@@ -1,34 +1,43 @@
 package com.group4.quizapp.ui.history
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.group4.quizapp.data.database.QuizDatabase
-import com.group4.quizapp.data.database.QuizResult
-import com.group4.quizapp.data.repository.QuizRepository
-import kotlinx.coroutines.Dispatchers
+import com.group4.quizapp.domain.model.QuizResult
+import com.group4.quizapp.domain.usecase.ClearHistoryUseCase
+import com.group4.quizapp.domain.usecase.ObserveHistoryUseCase
+import com.group4.quizapp.domain.usecase.SearchHistoryUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HistoryViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = QuizRepository(
-        QuizDatabase.getDatabase(application).quizDao()
-    )
+@OptIn(ExperimentalCoroutinesApi::class)
+@HiltViewModel
+class HistoryViewModel @Inject constructor(
+    private val observeHistoryUseCase: ObserveHistoryUseCase,
+    private val searchHistoryUseCase: SearchHistoryUseCase,
+    private val clearHistoryUseCase: ClearHistoryUseCase
+) : ViewModel() {
 
-    private val _results = MutableLiveData<List<QuizResult>>()
-    val results: LiveData<List<QuizResult>> = _results
+    private val query = MutableStateFlow("")
 
-    fun loadHistory() = viewModelScope.launch(Dispatchers.IO) {
-        _results.postValue(repository.getAllResults())
+    // null = not loaded yet, distinct from "loaded and genuinely empty"
+    val results: StateFlow<List<QuizResult>?> = query
+        .flatMapLatest { q ->
+            if (q.isBlank()) observeHistoryUseCase() else searchHistoryUseCase(q)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    fun search(newQuery: String) {
+        query.value = newQuery
     }
 
-    fun search(query: String) = viewModelScope.launch(Dispatchers.IO) {
-        _results.postValue(repository.searchResults(query))
-    }
-
-    fun clearHistory() = viewModelScope.launch(Dispatchers.IO) {
-        repository.clearResults()
-        _results.postValue(emptyList())
+    fun clearHistory() = viewModelScope.launch {
+        clearHistoryUseCase()
     }
 }

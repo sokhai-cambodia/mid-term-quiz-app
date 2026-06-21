@@ -1,4 +1,4 @@
-package com.group4.quizapp.data.database
+package com.group4.quizapp.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
     tableName = "quiz_attempt_details",
     foreignKeys = [
         ForeignKey(
-            entity = QuizResult::class,
+            entity = QuizResultEntity::class,
             parentColumns = ["id"],
             childColumns = ["resultId"],
             onDelete = ForeignKey.CASCADE
@@ -17,7 +17,7 @@ import androidx.room.PrimaryKey
     ],
     indices = [Index(value = ["resultId"])]
 )
-data class QuizAttemptDetail(
+data class QuizAttemptDetailEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val resultId: Int,

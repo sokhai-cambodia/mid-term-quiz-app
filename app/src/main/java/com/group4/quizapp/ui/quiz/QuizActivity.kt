@@ -13,12 +13,21 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.group4.quizapp.R
-import com.group4.quizapp.data.database.Question
+import com.group4.quizapp.domain.model.Question
 import com.group4.quizapp.ui.result.ResultActivity
 import com.group4.quizapp.utils.PreferencesManager
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class QuizActivity : AppCompatActivity() {
+
+    @Inject lateinit var preferencesManager: PreferencesManager
 
     private lateinit var tvQuestion: TextView
     private lateinit var tvQuestionNumber: TextView
@@ -74,44 +83,56 @@ class QuizActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        // Observe questions
-        viewModel.questions.observe(this) { questions ->
-            if (questions.isEmpty()) {
-                tvQuestion.text = "No questions found for this category and difficulty!"
-            } else {
-                if (startTime == 0L) {
-                    startTime = System.currentTimeMillis()
-                }
-                val index = viewModel.currentIndex.value ?: 0
-                if (index < questions.size) {
-                    showQuestion(questions[index], index, questions.size)
-                }
-            }
-        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Observe questions
+                launch {
+                    viewModel.questions.collect { questions ->
+                        if (questions == null) return@collect // still loading
 
-        // Observe current index changes
-        viewModel.currentIndex.observe(this) { index ->
-            val questions = viewModel.questions.value ?: return@observe
-            if (index < questions.size) {
-                showQuestion(questions[index], index, questions.size)
-            }
-        }
+                        if (questions.isEmpty()) {
+                            tvQuestion.text = "No questions found for this category and difficulty!"
+                        } else {
+                            if (startTime == 0L) {
+                                startTime = System.currentTimeMillis()
+                            }
+                            val index = viewModel.currentIndex.value
+                            if (index < questions.size) {
+                                showQuestion(questions[index], index, questions.size)
+                            }
+                        }
+                    }
+                }
 
-        viewModel.quizFinished.observe(this) { finished ->
-            if (finished) {
-                val timeSpent = ((System.currentTimeMillis() - startTime) / 1000).toInt()
-                
-                // Save results with details before finishing
-                viewModel.saveResults(category, difficulty, timeSpent)
-                
-                val intent = Intent(this, ResultActivity::class.java)
-                intent.putExtra("score", viewModel.score.value ?: 0)
-                intent.putExtra("total", viewModel.questions.value?.size ?: 0)
-                intent.putExtra("category", category)
-                intent.putExtra("difficulty", difficulty)
-                intent.putExtra("timeSpent", timeSpent)
-                startActivity(intent)
-                finish()
+                // Observe current index changes
+                launch {
+                    viewModel.currentIndex.collect { index ->
+                        val questions = viewModel.questions.value ?: return@collect
+                        if (index < questions.size) {
+                            showQuestion(questions[index], index, questions.size)
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.quizFinished.collect { finished ->
+                        if (finished) {
+                            val timeSpent = ((System.currentTimeMillis() - startTime) / 1000).toInt()
+
+                            // Save results with details before finishing
+                            viewModel.saveResults(category, difficulty, timeSpent)
+
+                            val intent = Intent(this@QuizActivity, ResultActivity::class.java)
+                            intent.putExtra("score", viewModel.score.value)
+                            intent.putExtra("total", viewModel.questions.value?.size ?: 0)
+                            intent.putExtra("category", category)
+                            intent.putExtra("difficulty", difficulty)
+                            intent.putExtra("timeSpent", timeSpent)
+                            startActivity(intent)
+                            finish()
+                        }
+                    }
+                }
             }
         }
     }
@@ -136,8 +157,7 @@ class QuizActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
-        val prefs = PreferencesManager(this)
-        val timerSeconds = prefs.timerDuration
+        val timerSeconds = preferencesManager.timerDuration
         timer = object : CountDownTimer(timerSeconds * 1000L, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 tvTimer.text = "${millisUntilFinished / 1000}s"
@@ -156,7 +176,7 @@ class QuizActivity : AppCompatActivity() {
         isAnswered = true
 
         val questions = viewModel.questions.value ?: return
-        val currentIndex = viewModel.currentIndex.value ?: 0
+        val currentIndex = viewModel.currentIndex.value
         if (currentIndex >= questions.size) return
         
         timer?.cancel()

@@ -1,20 +1,18 @@
 package com.group4.quizapp.ui.main
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.group4.quizapp.data.database.DatabaseSeeder
-import com.group4.quizapp.data.database.QuizDatabase
-import com.group4.quizapp.data.repository.QuizRepository
-import kotlinx.coroutines.Dispatchers
+import com.group4.quizapp.domain.usecase.SeedDatabaseUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = QuizRepository(
-        QuizDatabase.getDatabase(application).quizDao()
-    )
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val seedDatabaseUseCase: SeedDatabaseUseCase
+) : ViewModel() {
 
-    fun seedDatabase() = viewModelScope.launch(Dispatchers.IO) {
-        DatabaseSeeder.seedDatabase(QuizDatabase.getDatabase(getApplication()))
+    fun seedDatabase() = viewModelScope.launch {
+        seedDatabaseUseCase()
     }
 }

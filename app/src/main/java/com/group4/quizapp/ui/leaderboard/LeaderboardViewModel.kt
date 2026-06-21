@@ -1,25 +1,20 @@
 package com.group4.quizapp.ui.leaderboard
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.group4.quizapp.data.database.QuizDatabase
-import com.group4.quizapp.data.database.QuizResult
-import com.group4.quizapp.data.repository.QuizRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.group4.quizapp.domain.model.QuizResult
+import com.group4.quizapp.domain.usecase.ObserveLeaderboardUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class LeaderboardViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = QuizRepository(
-        QuizDatabase.getDatabase(application).quizDao()
-    )
+@HiltViewModel
+class LeaderboardViewModel @Inject constructor(
+    observeLeaderboardUseCase: ObserveLeaderboardUseCase
+) : ViewModel() {
 
-    private val _topScores = MutableLiveData<List<QuizResult>>()
-    val topScores: LiveData<List<QuizResult>> = _topScores
-
-    fun loadLeaderboard() = viewModelScope.launch(Dispatchers.IO) {
-        _topScores.postValue(repository.getTopScoresByCategory())
-    }
+    val topScores: StateFlow<List<QuizResult>> = observeLeaderboardUseCase()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 }

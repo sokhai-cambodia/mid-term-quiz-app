@@ -1,8 +1,11 @@
-package com.group4.quizapp.data.database
+package com.group4.quizapp.data.local
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.group4.quizapp.data.local.entity.QuestionEntity
+import com.group4.quizapp.data.local.entity.QuizResultEntity
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -32,7 +35,7 @@ class QuizDaoTest {
 
     @Test
     fun insertAndGetQuestions() = runBlocking {
-        val question = Question(
+        val question = QuestionEntity(
             questionText = "Test Question",
             optionA = "A", optionB = "B", optionC = "C", optionD = "D",
             correctOption = "A", category = "Test", difficulty = "Easy"
@@ -45,30 +48,30 @@ class QuizDaoTest {
 
     @Test
     fun insertAndGetResults() = runBlocking {
-        val result = QuizResult(
+        val result = QuizResultEntity(
             category = "Test", difficulty = "Easy", score = 5,
             totalQuestions = 5, dateTaken = "21 Jun 2026", timeSpent = 30
         )
         dao.insertResult(result)
-        val results = dao.getAllResults()
+        val results = dao.getAllResults().first()
         assertEquals(1, results.size)
         assertEquals(5, results[0].score)
     }
 
     @Test
     fun clearResults() = runBlocking {
-        dao.insertResult(QuizResult(category = "T1", score = 5, totalQuestions = 5, dateTaken = "D1"))
+        dao.insertResult(QuizResultEntity(category = "T1", score = 5, totalQuestions = 5, dateTaken = "D1"))
         dao.clearResults()
-        val results = dao.getAllResults()
+        val results = dao.getAllResults().first()
         assertEquals(0, results.size)
     }
 
     @Test
     fun searchResults() = runBlocking {
-        dao.insertResult(QuizResult(category = "Science", score = 5, totalQuestions = 5, dateTaken = "D1"))
-        dao.insertResult(QuizResult(category = "Math", score = 3, totalQuestions = 5, dateTaken = "D2"))
-        
-        val searchSci = dao.searchResults("Sci")
+        dao.insertResult(QuizResultEntity(category = "Science", score = 5, totalQuestions = 5, dateTaken = "D1"))
+        dao.insertResult(QuizResultEntity(category = "Math", score = 3, totalQuestions = 5, dateTaken = "D2"))
+
+        val searchSci = dao.searchResults("Sci").first()
         assertEquals(1, searchSci.size)
         assertEquals("Science", searchSci[0].category)
     }

@@ -9,11 +9,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.group4.quizapp.R
 import com.group4.quizapp.ui.main.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class LeaderboardActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
@@ -38,7 +44,6 @@ class LeaderboardActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         setupObservers()
-        viewModel.loadLeaderboard()
 
         findViewById<Button>(R.id.btnGoHomeLeaderboard).setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
@@ -48,8 +53,12 @@ class LeaderboardActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        viewModel.topScores.observe(this) { scores ->
-            recyclerView.adapter = LeaderboardAdapter(scores)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.topScores.collect { scores ->
+                    recyclerView.adapter = LeaderboardAdapter(scores)
+                }
+            }
         }
     }
 }

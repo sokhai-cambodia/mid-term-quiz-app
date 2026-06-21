@@ -11,12 +11,18 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.group4.quizapp.R
 import com.group4.quizapp.ui.details.QuizDetailActivity
 import com.group4.quizapp.ui.main.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class HistoryActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
@@ -46,7 +52,6 @@ class HistoryActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         setupObservers()
-        viewModel.loadHistory()
         setupSearch()
 
         btnClearHistory.setOnClickListener {
@@ -69,30 +74,32 @@ class HistoryActivity : AppCompatActivity() {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                if (newText.isNullOrBlank()) {
-                    viewModel.loadHistory()
-                } else {
-                    viewModel.search(newText)
-                }
+                viewModel.search(newText.orEmpty())
                 return true
             }
         })
     }
 
     private fun setupObservers() {
-        viewModel.results.observe(this) { results ->
-            if (results.isEmpty() && searchView.query.isNullOrBlank()) {
-                Toast.makeText(
-                    this@HistoryActivity,
-                    "No history found!",
-                    Toast.LENGTH_SHORT
-                ).show()
-                recyclerView.adapter = HistoryAdapter(emptyList()) {}
-            } else {
-                recyclerView.adapter = HistoryAdapter(results) { result ->
-                    val intent = Intent(this, QuizDetailActivity::class.java)
-                    intent.putExtra("resultId", result.id)
-                    startActivity(intent)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.results.collect { results ->
+                    if (results == null) return@collect // still loading
+
+                    if (results.isEmpty() && searchView.query.isNullOrBlank()) {
+                        Toast.makeText(
+                            this@HistoryActivity,
+                            "No history found!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        recyclerView.adapter = HistoryAdapter(emptyList()) {}
+                    } else {
+                        recyclerView.adapter = HistoryAdapter(results) { result ->
+                            val intent = Intent(this@HistoryActivity, QuizDetailActivity::class.java)
+                            intent.putExtra("resultId", result.id)
+                            startActivity(intent)
+                        }
+                    }
                 }
             }
         }

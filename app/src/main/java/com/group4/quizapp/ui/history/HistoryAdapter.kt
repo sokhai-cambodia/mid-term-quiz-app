@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.group4.quizapp.R
-import com.group4.quizapp.data.database.QuizResult
+import com.group4.quizapp.domain.model.QuizResult
 
 class HistoryAdapter(
     private val results: List<QuizResult>,

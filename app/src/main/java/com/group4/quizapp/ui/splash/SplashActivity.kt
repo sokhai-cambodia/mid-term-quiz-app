@@ -6,30 +6,33 @@ import android.os.Handler
 import android.os.Looper
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import com.group4.quizapp.R
 import com.group4.quizapp.ui.main.MainActivity
-import com.group4.quizapp.utils.PreferencesManager
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SplashActivity : AppCompatActivity() {
+
+    private val handler = Handler(Looper.getMainLooper())
+    private val navigateToMain = Runnable {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        // Apply saved dark mode preference
-        val prefs = PreferencesManager(this)
-        if (prefs.isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
+        // Dark mode preference is applied once in QuizApplication.onCreate(),
+        // before any Activity exists — no need to re-apply it here.
 
         // Wait 2 seconds then go to Home Screen
-        Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }, 2000)
+        handler.postDelayed(navigateToMain, 2000)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(navigateToMain)
     }
 }

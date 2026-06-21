@@ -1,27 +1,26 @@
 package com.group4.quizapp.ui.settings
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.group4.quizapp.data.database.QuizDatabase
-import com.group4.quizapp.data.repository.QuizRepository
+import com.group4.quizapp.domain.usecase.ClearHistoryUseCase
 import com.group4.quizapp.utils.PreferencesManager
-import kotlinx.coroutines.Dispatchers
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SettingsViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = QuizRepository(
-        QuizDatabase.getDatabase(application).quizDao()
-    )
-    private val prefs = PreferencesManager(application)
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    private val preferencesManager: PreferencesManager,
+    private val clearHistoryUseCase: ClearHistoryUseCase
+) : ViewModel() {
 
-    val isDarkMode get() = prefs.isDarkMode
-    val timerDuration get() = prefs.timerDuration
+    val isDarkMode get() = preferencesManager.isDarkMode
+    val timerDuration get() = preferencesManager.timerDuration
 
-    fun setDarkMode(enabled: Boolean) { prefs.isDarkMode = enabled }
-    fun setTimerDuration(seconds: Int) { prefs.timerDuration = seconds }
+    fun setDarkMode(enabled: Boolean) { preferencesManager.isDarkMode = enabled }
+    fun setTimerDuration(seconds: Int) { preferencesManager.timerDuration = seconds }
 
-    fun clearHistory() = viewModelScope.launch(Dispatchers.IO) {
-        repository.clearResults()
+    fun clearHistory() = viewModelScope.launch {
+        clearHistoryUseCase()
     }
 }

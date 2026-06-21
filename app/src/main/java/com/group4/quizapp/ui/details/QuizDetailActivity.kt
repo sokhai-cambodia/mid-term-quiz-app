@@ -8,10 +8,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.group4.quizapp.R
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class QuizDetailActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
@@ -36,9 +42,13 @@ class QuizDetailActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         val resultId = intent.getIntExtra("resultId", -1)
-        
-        viewModel.details.observe(this) { details ->
-            recyclerView.adapter = QuizDetailAdapter(details)
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.details.collect { details ->
+                    recyclerView.adapter = QuizDetailAdapter(details)
+                }
+            }
         }
 
         if (resultId != -1) {

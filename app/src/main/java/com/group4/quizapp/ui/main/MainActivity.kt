@@ -6,7 +6,6 @@ import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -15,8 +14,9 @@ import com.group4.quizapp.ui.history.HistoryActivity
 import com.group4.quizapp.ui.leaderboard.LeaderboardActivity
 import com.group4.quizapp.ui.quiz.QuizActivity
 import com.group4.quizapp.ui.settings.SettingsActivity
-import com.group4.quizapp.utils.PreferencesManager
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModels()
@@ -35,15 +35,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        
-        // Apply saved dark mode preference
-        val prefs = PreferencesManager(this)
-        if (prefs.isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
-        
+
+        // Dark mode preference is applied once in QuizApplication.onCreate(),
+        // before any Activity exists — no need to re-apply it here.
+
         setContentView(R.layout.activity_main)
 
         // Handle window insets for safe header and footer
