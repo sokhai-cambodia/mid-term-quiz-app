@@ -1,20 +1,21 @@
-package com.group4.quizapp
+package com.group4.quizapp.ui.result
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.group4.quizapp.database.QuizDatabase
-import com.group4.quizapp.database.QuizResult
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.group4.quizapp.R
+import com.group4.quizapp.data.database.QuizResult
+import com.group4.quizapp.ui.main.MainActivity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class ResultActivity : AppCompatActivity() {
+
+    private val viewModel: ResultViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,22 +52,19 @@ class ResultActivity : AppCompatActivity() {
         }
 
         // Save result to database
-        val db = QuizDatabase.getDatabase(this)
         val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
         val today = dateFormat.format(Date())
 
-        CoroutineScope(Dispatchers.IO).launch {
-            db.quizDao().insertResult(
-                QuizResult(
-                    category = category,
-                    difficulty = difficulty,
-                    score = score,
-                    totalQuestions = total,
-                    dateTaken = today,
-                    timeSpent = timeSpent
-                )
+        viewModel.saveResult(
+            QuizResult(
+                category = category,
+                difficulty = difficulty,
+                score = score,
+                totalQuestions = total,
+                dateTaken = today,
+                timeSpent = timeSpent
             )
-        }
+        )
 
         // Button clicks
         btnRetake.setOnClickListener {

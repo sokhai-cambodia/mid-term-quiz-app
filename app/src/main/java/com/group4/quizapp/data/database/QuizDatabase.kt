@@ -1,4 +1,4 @@
-package com.group4.quizapp.database
+package com.group4.quizapp.data.database
 
 import android.content.Context
 import androidx.room.Database

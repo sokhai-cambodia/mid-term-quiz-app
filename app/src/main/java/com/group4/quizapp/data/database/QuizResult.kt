@@ -1,4 +1,4 @@
-package com.group4.quizapp.database
+package com.group4.quizapp.data.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

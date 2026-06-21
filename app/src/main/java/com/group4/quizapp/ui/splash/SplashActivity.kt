@@ -1,4 +1,4 @@
-package com.group4.quizapp
+package com.group4.quizapp.ui.splash
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,6 +6,9 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import com.group4.quizapp.R
+import com.group4.quizapp.ui.main.MainActivity
+import com.group4.quizapp.utils.PreferencesManager
 
 class SplashActivity : AppCompatActivity() {
 
@@ -14,9 +17,8 @@ class SplashActivity : AppCompatActivity() {
         setContentView(R.layout.activity_splash)
 
         // Apply saved dark mode preference
-        val prefs = getSharedPreferences("QuizAppPrefs", MODE_PRIVATE)
-        val isDarkMode = prefs.getBoolean("darkMode", false)
-        if (isDarkMode) {
+        val prefs = PreferencesManager(this)
+        if (prefs.isDarkMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)

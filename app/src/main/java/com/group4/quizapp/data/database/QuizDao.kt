@@ -1,4 +1,4 @@
-package com.group4.quizapp.database
+package com.group4.quizapp.data.database
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -34,7 +34,16 @@ interface QuizDao {
     suspend fun getAllResults(): List<QuizResult>
 
     @Query("DELETE FROM quiz_results")
-    suspend fun clearAllResults()
+    suspend fun clearResults()
+
+    // For Leaderboard — top score per category
+    @Query("SELECT * FROM quiz_results ORDER BY score DESC")
+    suspend fun getTopScoresByCategory(): List<QuizResult>
+
+    // For Search/Filter on History
+    @Query("SELECT * FROM quiz_results WHERE category LIKE '%' || :query || '%' OR difficulty LIKE '%' || :query || '%' ORDER BY id DESC")
+    suspend fun searchResults(query: String): List<QuizResult>
+
     @Query("DELETE FROM questions")
     suspend fun clearAllQuestions()
 }

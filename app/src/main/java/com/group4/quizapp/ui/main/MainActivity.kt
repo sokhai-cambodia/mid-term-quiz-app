@@ -1,23 +1,29 @@
-package com.group4.quizapp
+package com.group4.quizapp.ui.main
 
 import androidx.appcompat.app.AppCompatDelegate
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.group4.quizapp.database.QuizDatabase
+import com.group4.quizapp.R
+import com.group4.quizapp.ui.quiz.QuizActivity
+import com.group4.quizapp.ui.history.HistoryActivity
+import com.group4.quizapp.ui.leaderboard.LeaderboardActivity
+import com.group4.quizapp.ui.settings.SettingsActivity
+import com.group4.quizapp.utils.PreferencesManager
 
 class MainActivity : AppCompatActivity() {
 
+    private val viewModel: MainViewModel by viewModels()
     private var selectedCategory = "General"
     private var selectedDifficulty = "Easy"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Apply saved dark mode preference
-        val prefs = getSharedPreferences("QuizAppPrefs", MODE_PRIVATE)
-        val isDarkMode = prefs.getBoolean("darkMode", false)
-        if (isDarkMode) {
+        val prefs = PreferencesManager(this)
+        if (prefs.isDarkMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -25,8 +31,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // Seed database
-        val db = QuizDatabase.getDatabase(this)
-        DatabaseSeeder.seedDatabase(db)
+        viewModel.seedDatabase()
 
         // Category buttons
         findViewById<Button>(R.id.btnScience).setOnClickListener {
@@ -64,6 +69,11 @@ class MainActivity : AppCompatActivity() {
         // History navigation button
         findViewById<Button>(R.id.btnHistoryNav).setOnClickListener {
             startActivity(Intent(this, HistoryActivity::class.java))
+        }
+
+        // Leaderboard navigation button
+        findViewById<Button>(R.id.btnLeaderboard).setOnClickListener {
+            startActivity(Intent(this, LeaderboardActivity::class.java))
         }
 
         // Settings navigation button

@@ -1,7 +1,5 @@
-package com.group4.quizapp
+package com.group4.quizapp.data.database
 
-import com.group4.quizapp.database.Question
-import com.group4.quizapp.database.QuizDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

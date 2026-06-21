@@ -1,19 +1,19 @@
-package com.group4.quizapp
+package com.group4.quizapp.ui.settings
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SwitchCompat
-import com.group4.quizapp.database.QuizDatabase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.group4.quizapp.R
+import com.group4.quizapp.ui.main.MainActivity
 
 class SettingsActivity : AppCompatActivity() {
+
+    private val viewModel: SettingsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,16 +23,15 @@ class SettingsActivity : AppCompatActivity() {
         val btn15s = findViewById<Button>(R.id.btn15s)
         val btn30s = findViewById<Button>(R.id.btn30s)
         val btn60s = findViewById<Button>(R.id.btn60s)
+        val btn90s = findViewById<Button>(R.id.btn90s)
         val btnClearAllHistory = findViewById<Button>(R.id.btnClearAllHistory)
 
         // Load saved preferences
-        val prefs = getSharedPreferences("QuizAppPrefs", MODE_PRIVATE)
-        val isDarkMode = prefs.getBoolean("darkMode", false)
-        switchDarkMode.isChecked = isDarkMode
+        switchDarkMode.isChecked = viewModel.isDarkMode
 
         // Dark mode toggle
         switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit().putBoolean("darkMode", isChecked).apply()
+            viewModel.setDarkMode(isChecked)
             if (isChecked) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             } else {
@@ -42,37 +41,28 @@ class SettingsActivity : AppCompatActivity() {
 
         // Timer buttons
         btn15s.setOnClickListener {
-            prefs.edit().putInt("timerDuration", 15).apply()
+            viewModel.setTimerDuration(15)
             Toast.makeText(this, "Timer set to 15 seconds", Toast.LENGTH_SHORT).show()
         }
         btn30s.setOnClickListener {
-            prefs.edit().putInt("timerDuration", 30).apply()
+            viewModel.setTimerDuration(30)
             Toast.makeText(this, "Timer set to 30 seconds", Toast.LENGTH_SHORT).show()
         }
         btn60s.setOnClickListener {
-            prefs.edit().putInt("timerDuration", 60).apply()
+            viewModel.setTimerDuration(60)
             Toast.makeText(this, "Timer set to 60 seconds", Toast.LENGTH_SHORT).show()
         }
-        val btn90s = findViewById<Button>(R.id.btn90s)
         btn90s.setOnClickListener {
-            prefs.edit().putInt("timerDuration", 90).apply()
+            viewModel.setTimerDuration(90)
             Toast.makeText(this, "Timer set to 90 seconds", Toast.LENGTH_SHORT).show()
         }
 
         // Clear all history
         btnClearAllHistory.setOnClickListener {
-            val db = QuizDatabase.getDatabase(this)
-            CoroutineScope(Dispatchers.IO).launch {
-                db.quizDao().clearAllResults()
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        this@SettingsActivity,
-                        "All history cleared!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-              }
-            }
+            viewModel.clearHistory()
+            Toast.makeText(this, "All history cleared!", Toast.LENGTH_SHORT).show()
+        }
+
         // Go Home button
         val btnGoHomeSettings = findViewById<Button>(R.id.btnGoHomeSettings)
         btnGoHomeSettings.setOnClickListener {

@@ -1,4 +1,4 @@
-package com.group4.quizapp
+package com.group4.quizapp.ui.quiz
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,13 +6,12 @@ import android.os.CountDownTimer
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.group4.quizapp.database.Question
-import com.group4.quizapp.database.QuizDatabase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.group4.quizapp.R
+import com.group4.quizapp.data.database.Question
+import com.group4.quizapp.ui.result.ResultActivity
+import com.group4.quizapp.utils.PreferencesManager
 
 class QuizActivity : AppCompatActivity() {
 
@@ -25,11 +24,8 @@ class QuizActivity : AppCompatActivity() {
     private lateinit var btnOptionC: Button
     private lateinit var btnOptionD: Button
 
+    private val viewModel: QuizViewModel by viewModels()
     private var startTime: Long = 0
-    private var questions = listOf<Question>()
-    private var currentIndex = 0
-    private var score = 0
-    private var answered = false
     private var timer: CountDownTimer? = null
     private var category = "General"
     private var difficulty = "Easy"
@@ -50,47 +46,52 @@ class QuizActivity : AppCompatActivity() {
         btnOptionC = findViewById(R.id.btnOptionC)
         btnOptionD = findViewById(R.id.btnOptionD)
 
-        loadQuestions()
+        setupObservers()
+        viewModel.loadQuestions(category, difficulty)
 
-        btnOptionA.setOnClickListener {
-            if (questions.isNotEmpty() && !answered) checkAnswer("A")
-        }
-        btnOptionB.setOnClickListener {
-            if (questions.isNotEmpty() && !answered) checkAnswer("B")
-        }
-        btnOptionC.setOnClickListener {
-            if (questions.isNotEmpty() && !answered) checkAnswer("C")
-        }
-        btnOptionD.setOnClickListener {
-            if (questions.isNotEmpty() && !answered) checkAnswer("D")
-        }
+        btnOptionA.setOnClickListener { checkAnswer("A") }
+        btnOptionB.setOnClickListener { checkAnswer("B") }
+        btnOptionC.setOnClickListener { checkAnswer("C") }
+        btnOptionD.setOnClickListener { checkAnswer("D") }
     }
 
-    private fun loadQuestions() {
-        val db = QuizDatabase.getDatabase(this)
-        CoroutineScope(Dispatchers.IO).launch {
-            questions = db.quizDao().getQuestions(category, difficulty)
-            withContext(Dispatchers.Main) {
-                if (questions.isEmpty()) {
-                    tvQuestion.text = "No questions found for this category and difficulty!"
-                } else {
-                    showQuestion()
-
-                    if (currentIndex == 0) {
-                        startTime = System.currentTimeMillis()
-                    }
+    private fun setupObservers() {
+        viewModel.questions.observe(this) { questions ->
+            if (questions.isEmpty()) {
+                tvQuestion.text = "No questions found for this category and difficulty!"
+            } else {
+                if (viewModel.currentIndex.value == 0) {
+                    startTime = System.currentTimeMillis()
                 }
+            }
+        }
+
+        viewModel.currentIndex.observe(this) { index ->
+            val questions = viewModel.questions.value ?: return@observe
+            if (index < questions.size) {
+                showQuestion(questions[index], index, questions.size)
+            }
+        }
+
+        viewModel.quizFinished.observe(this) { finished ->
+            if (finished) {
+                val timeSpent = ((System.currentTimeMillis() - startTime) / 1000).toInt()
+                val intent = Intent(this, ResultActivity::class.java)
+                intent.putExtra("score", viewModel.score.value ?: 0)
+                intent.putExtra("total", viewModel.questions.value?.size ?: 0)
+                intent.putExtra("category", category)
+                intent.putExtra("difficulty", difficulty)
+                intent.putExtra("timeSpent", timeSpent)
+                startActivity(intent)
+                finish()
             }
         }
     }
 
-    private fun showQuestion() {
+    private fun showQuestion(question: Question, index: Int, total: Int) {
         timer?.cancel()
-        answered = false
-        val question = questions[currentIndex]
-
-        tvQuestionNumber.text = "Question ${currentIndex + 1} of ${questions.size}"
-        progressBar.progress = ((currentIndex + 1) * 100 / questions.size)
+        tvQuestionNumber.text = "Question ${index + 1} of $total"
+        progressBar.progress = ((index + 1) * 100 / total)
 
         tvQuestion.text = question.questionText
         btnOptionA.text = "A.  ${question.optionA}"
@@ -103,52 +104,38 @@ class QuizActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
-        val prefs = getSharedPreferences("QuizAppPrefs", MODE_PRIVATE)
-        val timerSeconds = prefs.getInt("timerDuration", 30)
+        val prefs = PreferencesManager(this)
+        val timerSeconds = prefs.timerDuration
         timer = object : CountDownTimer(timerSeconds * 1000L, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 tvTimer.text = "${millisUntilFinished / 1000}s"
             }
             override fun onFinish() {
                 tvTimer.text = "0s"
-                if (!answered) moveToNext()
+                viewModel.answerQuestion(false)
             }
         }.start()
     }
 
     private fun checkAnswer(selected: String) {
-        if (answered) return
-        answered = true
+        val questions = viewModel.questions.value ?: return
+        val currentIndex = viewModel.currentIndex.value ?: 0
+        if (currentIndex >= questions.size) return
+        
         timer?.cancel()
-
         val correct = questions[currentIndex].correctOption
+        val isCorrect = selected == correct
 
-        if (selected == correct) {
-            score++
+        if (isCorrect) {
             getButtonByOption(selected).setBackgroundColor(0xFF2ECC71.toInt())
         } else {
             getButtonByOption(selected).setBackgroundColor(0xFFE74C3C.toInt())
             getButtonByOption(correct).setBackgroundColor(0xFF2ECC71.toInt())
         }
 
-        tvQuestion.postDelayed({ moveToNext() }, 1000)
-    }
-
-    private fun moveToNext() {
-        currentIndex++
-        if (currentIndex < questions.size) {
-            showQuestion()
-        } else {
-            val timeSpent = ((System.currentTimeMillis() - startTime) / 1000).toInt()
-            val intent = Intent(this, ResultActivity::class.java)
-            intent.putExtra("score", score)
-            intent.putExtra("total", questions.size)
-            intent.putExtra("category", category)
-            intent.putExtra("difficulty", difficulty)
-            intent.putExtra("timeSpent", timeSpent)
-            startActivity(intent)
-            finish()
-        }
+        tvQuestion.postDelayed({ 
+            viewModel.answerQuestion(isCorrect)
+        }, 1000)
     }
 
     private fun getButtonByOption(option: String): Button {
