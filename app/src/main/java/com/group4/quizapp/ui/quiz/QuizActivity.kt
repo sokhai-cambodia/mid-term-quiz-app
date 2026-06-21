@@ -33,6 +33,7 @@ class QuizActivity : AppCompatActivity() {
     private var timer: CountDownTimer? = null
     private var category = "General"
     private var difficulty = "Easy"
+    private var lastShownIndex = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -71,16 +72,22 @@ class QuizActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
+        // Observe questions
         viewModel.questions.observe(this) { questions ->
             if (questions.isEmpty()) {
                 tvQuestion.text = "No questions found for this category and difficulty!"
             } else {
-                if (viewModel.currentIndex.value == 0) {
+                if (startTime == 0L) {
                     startTime = System.currentTimeMillis()
+                }
+                val index = viewModel.currentIndex.value ?: 0
+                if (index < questions.size) {
+                    showQuestion(questions[index], index, questions.size)
                 }
             }
         }
 
+        // Observe current index changes
         viewModel.currentIndex.observe(this) { index ->
             val questions = viewModel.questions.value ?: return@observe
             if (index < questions.size) {
@@ -104,6 +111,9 @@ class QuizActivity : AppCompatActivity() {
     }
 
     private fun showQuestion(question: Question, index: Int, total: Int) {
+        if (index == lastShownIndex) return
+        lastShownIndex = index
+
         timer?.cancel()
         tvQuestionNumber.text = "Question ${index + 1} of $total"
         progressBar.progress = ((index + 1) * 100 / total)

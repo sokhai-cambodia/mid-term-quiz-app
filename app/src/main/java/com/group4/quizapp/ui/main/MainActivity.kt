@@ -23,6 +23,15 @@ class MainActivity : AppCompatActivity() {
     private var selectedCategory = "General"
     private var selectedDifficulty = "Easy"
 
+    private lateinit var btnScience: Button
+    private lateinit var btnMath: Button
+    private lateinit var btnHistory: Button
+    private lateinit var btnGeneral: Button
+    
+    private lateinit var btnEasy: Button
+    private lateinit var btnMedium: Button
+    private lateinit var btnHard: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -47,32 +56,53 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        // Initialize buttons
+        btnScience = findViewById(R.id.btnScience)
+        btnMath = findViewById(R.id.btnMath)
+        btnHistory = findViewById(R.id.btnCategoryHistory)
+        btnGeneral = findViewById(R.id.btnGeneral)
+        
+        btnEasy = findViewById(R.id.btnEasy)
+        btnMedium = findViewById(R.id.btnMedium)
+        btnHard = findViewById(R.id.btnHard)
+
+        // Set initial selection UI
+        updateCategoryUI()
+        updateDifficultyUI()
+
         // Seed database
         viewModel.seedDatabase()
 
         // Category buttons
-        findViewById<Button>(R.id.btnScience).setOnClickListener {
+        btnScience.setOnClickListener {
             selectedCategory = "Science"
+            updateCategoryUI()
         }
-        findViewById<Button>(R.id.btnMath).setOnClickListener {
+        btnMath.setOnClickListener {
             selectedCategory = "Math"
+            updateCategoryUI()
         }
-        findViewById<Button>(R.id.btnCategoryHistory).setOnClickListener {
+        btnHistory.setOnClickListener {
             selectedCategory = "History"
+            updateCategoryUI()
         }
-        findViewById<Button>(R.id.btnGeneral).setOnClickListener {
+        btnGeneral.setOnClickListener {
             selectedCategory = "General"
+            updateCategoryUI()
         }
 
         // Difficulty buttons
-        findViewById<Button>(R.id.btnEasy).setOnClickListener {
+        btnEasy.setOnClickListener {
             selectedDifficulty = "Easy"
+            updateDifficultyUI()
         }
-        findViewById<Button>(R.id.btnMedium).setOnClickListener {
+        btnMedium.setOnClickListener {
             selectedDifficulty = "Medium"
+            updateDifficultyUI()
         }
-        findViewById<Button>(R.id.btnHard).setOnClickListener {
+        btnHard.setOnClickListener {
             selectedDifficulty = "Hard"
+            updateDifficultyUI()
         }
 
         // Start Quiz button
@@ -103,6 +133,66 @@ class MainActivity : AppCompatActivity() {
         // Exit button
         findViewById<Button>(R.id.btnExit).setOnClickListener {
             finishAffinity()
+        }
+    }
+
+    private fun updateCategoryUI() {
+        val activeColor = 0xFF1B3A6B.toInt()
+        val activeTextColor = 0xFFFFFFFF.toInt()
+        val inactiveColor = 0xFFE8EEF8.toInt()
+        val inactiveTextColor = 0xFF1B3A6B.toInt()
+
+        val buttons = listOf(btnScience, btnMath, btnHistory, btnGeneral)
+        val names = listOf("Science", "Math", "History", "General")
+
+        for (i in buttons.indices) {
+            if (names[i] == selectedCategory) {
+                buttons[i].setBackgroundColor(activeColor)
+                buttons[i].setTextColor(activeTextColor)
+            } else {
+                buttons[i].setBackgroundColor(inactiveColor)
+                buttons[i].setTextColor(inactiveTextColor)
+            }
+        }
+    }
+
+    private fun updateDifficultyUI() {
+        // Active colors
+        val easyActive = 0xFF2ECC71.toInt()
+        val mediumActive = 0xFFF5A623.toInt()
+        val hardActive = 0xFFE74C3C.toInt()
+        val activeTextColor = 0xFFFFFFFF.toInt()
+
+        // Inactive colors
+        val easyInactive = 0xFFE6F7EE.toInt()
+        val easyInactiveText = 0xFF1A7A40.toInt()
+        val mediumInactive = 0xFFFFF3E0.toInt()
+        val mediumInactiveText = 0xFF7A4A00.toInt()
+        val hardInactive = 0xFFFFEEEE.toInt()
+        val hardInactiveText = 0xFFAA0000.toInt()
+
+        // Reset all to inactive first
+        btnEasy.setBackgroundColor(easyInactive)
+        btnEasy.setTextColor(easyInactiveText)
+        btnMedium.setBackgroundColor(mediumInactive)
+        btnMedium.setTextColor(mediumInactiveText)
+        btnHard.setBackgroundColor(hardInactive)
+        btnHard.setTextColor(hardInactiveText)
+
+        // Highlight selected
+        when (selectedDifficulty) {
+            "Easy" -> {
+                btnEasy.setBackgroundColor(easyActive)
+                btnEasy.setTextColor(activeTextColor)
+            }
+            "Medium" -> {
+                btnMedium.setBackgroundColor(mediumActive)
+                btnMedium.setTextColor(activeTextColor)
+            }
+            "Hard" -> {
+                btnHard.setBackgroundColor(hardActive)
+                btnHard.setTextColor(activeTextColor)
+            }
         }
     }
 }
