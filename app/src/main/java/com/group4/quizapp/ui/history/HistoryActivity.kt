@@ -2,18 +2,18 @@ package com.group4.quizapp.ui.history
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.group4.quizapp.R
-import com.group4.quizapp.data.database.QuizResult
 import com.group4.quizapp.ui.main.MainActivity
 
 class HistoryActivity : AppCompatActivity() {
@@ -24,8 +24,19 @@ class HistoryActivity : AppCompatActivity() {
     private val viewModel: HistoryViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_history)
+
+        // Handle window insets for safe header and footer
+        val rootLayout = findViewById<android.view.ViewGroup>(R.id.historyRoot)
+        val header = findViewById<android.view.ViewGroup>(R.id.historyHeader)
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            header.updatePadding(top = systemBars.top)
+            v.updatePadding(bottom = systemBars.bottom)
+            insets
+        }
 
         recyclerView = findViewById(R.id.recyclerHistory)
         btnClearHistory = findViewById(R.id.btnClearHistory)

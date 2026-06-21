@@ -4,10 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.group4.quizapp.R
 import com.group4.quizapp.ui.main.MainActivity
 
@@ -16,8 +20,19 @@ class SettingsActivity : AppCompatActivity() {
     private val viewModel: SettingsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+
+        // Handle window insets for safe header and footer
+        val rootLayout = findViewById<android.view.ViewGroup>(R.id.settingsRoot)
+        val header = findViewById<android.view.ViewGroup>(R.id.settingsHeader)
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            header.updatePadding(top = systemBars.top)
+            v.updatePadding(bottom = systemBars.bottom)
+            insets
+        }
 
         val switchDarkMode = findViewById<SwitchCompat>(R.id.switchDarkMode)
         val btn15s = findViewById<Button>(R.id.btn15s)

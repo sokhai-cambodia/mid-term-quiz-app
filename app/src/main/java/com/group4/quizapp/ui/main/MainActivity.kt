@@ -1,15 +1,19 @@
 package com.group4.quizapp.ui.main
 
-import androidx.appcompat.app.AppCompatDelegate
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.group4.quizapp.R
-import com.group4.quizapp.ui.quiz.QuizActivity
 import com.group4.quizapp.ui.history.HistoryActivity
 import com.group4.quizapp.ui.leaderboard.LeaderboardActivity
+import com.group4.quizapp.ui.quiz.QuizActivity
 import com.group4.quizapp.ui.settings.SettingsActivity
 import com.group4.quizapp.utils.PreferencesManager
 
@@ -20,7 +24,9 @@ class MainActivity : AppCompatActivity() {
     private var selectedDifficulty = "Easy"
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        
         // Apply saved dark mode preference
         val prefs = PreferencesManager(this)
         if (prefs.isDarkMode) {
@@ -28,7 +34,18 @@ class MainActivity : AppCompatActivity() {
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
+        
         setContentView(R.layout.activity_main)
+
+        // Handle window insets for safe header and footer
+        val rootLayout = findViewById<android.view.ViewGroup>(R.id.mainRoot)
+        val header = findViewById<android.view.ViewGroup>(R.id.mainHeader)
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            header.updatePadding(top = systemBars.top)
+            v.updatePadding(bottom = systemBars.bottom)
+            insets
+        }
 
         // Seed database
         viewModel.seedDatabase()

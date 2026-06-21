@@ -6,8 +6,12 @@ import android.os.CountDownTimer
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.group4.quizapp.R
 import com.group4.quizapp.data.database.Question
 import com.group4.quizapp.ui.result.ResultActivity
@@ -31,8 +35,19 @@ class QuizActivity : AppCompatActivity() {
     private var difficulty = "Easy"
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz)
+
+        // Handle window insets for safe header and footer
+        val rootLayout = findViewById<android.view.ViewGroup>(R.id.quizRoot)
+        val header = findViewById<android.view.ViewGroup>(R.id.quizHeader)
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            header.updatePadding(top = systemBars.top)
+            v.updatePadding(bottom = systemBars.bottom)
+            insets
+        }
 
         category = intent.getStringExtra("category") ?: "General"
         difficulty = intent.getStringExtra("difficulty") ?: "Easy"

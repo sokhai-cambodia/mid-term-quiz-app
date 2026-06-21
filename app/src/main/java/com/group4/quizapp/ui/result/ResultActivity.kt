@@ -4,8 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.group4.quizapp.R
 import com.group4.quizapp.data.database.QuizResult
 import com.group4.quizapp.ui.main.MainActivity
@@ -18,8 +22,19 @@ class ResultActivity : AppCompatActivity() {
     private val viewModel: ResultViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_result)
+
+        // Handle window insets for safe header and footer
+        val rootLayout = findViewById<android.view.ViewGroup>(R.id.resultRoot)
+        val header = findViewById<android.view.ViewGroup>(R.id.resultHeader)
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            header.updatePadding(top = systemBars.top)
+            v.updatePadding(bottom = systemBars.bottom)
+            insets
+        }
 
         // Get data from QuizActivity
         val score = intent.getIntExtra("score", 0)
