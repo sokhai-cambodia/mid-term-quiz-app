@@ -1,0 +1,307 @@
+package com.group4.quizapp
+
+import com.group4.quizapp.database.Question
+import com.group4.quizapp.database.QuizDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+object DatabaseSeeder {
+    fun seedDatabase(database: QuizDatabase) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val dao = database.quizDao()
+            dao.clearAllQuestions()
+            val questions = listOf(
+
+                // ==================
+                // SCIENCE - Easy
+                // ==================
+                Question(questionText = "What is the chemical symbol for water?",
+                    optionA = "O2", optionB = "H2O",
+                    optionC = "CO2", optionD = "HO",
+                    correctOption = "B", category = "Science", difficulty = "Easy"),
+                Question(questionText = "What is the largest planet in our solar system?",
+                    optionA = "Saturn", optionB = "Neptune",
+                    optionC = "Jupiter", optionD = "Uranus",
+                    correctOption = "C", category = "Science", difficulty = "Easy"),
+                Question(questionText = "How many legs does a spider have?",
+                    optionA = "6", optionB = "10",
+                    optionC = "12", optionD = "8",
+                    correctOption = "D", category = "Science", difficulty = "Easy"),
+                Question(questionText = "What do plants need to make food?",
+                    optionA = "Moonlight", optionB = "Sunlight",
+                    optionC = "Rain", optionD = "Wind",
+                    correctOption = "B", category = "Science", difficulty = "Easy"),
+                Question(questionText = "What planet is closest to the sun?",
+                    optionA = "Earth", optionB = "Venus",
+                    optionC = "Mars", optionD = "Mercury",
+                    correctOption = "D", category = "Science", difficulty = "Easy"),
+
+                // ==================
+                // SCIENCE - Medium
+                // ==================
+                Question(questionText = "What gas do plants absorb?",
+                    optionA = "Oxygen", optionB = "Nitrogen",
+                    optionC = "Carbon Dioxide", optionD = "Hydrogen",
+                    correctOption = "C", category = "Science", difficulty = "Medium"),
+                Question(questionText = "What is the atomic number of Carbon?",
+                    optionA = "8", optionB = "10",
+                    optionC = "6", optionD = "12",
+                    correctOption = "C", category = "Science", difficulty = "Medium"),
+                Question(questionText = "Which organ produces insulin?",
+                    optionA = "Liver", optionB = "Kidney",
+                    optionC = "Heart", optionD = "Pancreas",
+                    correctOption = "D", category = "Science", difficulty = "Medium"),
+                Question(questionText = "What is the boiling point of water in Celsius?",
+                    optionA = "90", optionB = "110",
+                    optionC = "100", optionD = "120",
+                    correctOption = "C", category = "Science", difficulty = "Medium"),
+                Question(questionText = "What type of energy does the sun produce?",
+                    optionA = "Chemical energy", optionB = "Nuclear energy",
+                    optionC = "Kinetic energy", optionD = "Mechanical energy",
+                    correctOption = "B", category = "Science", difficulty = "Medium"),
+
+                // ==================
+                // SCIENCE - Hard
+                // ==================
+                Question(questionText = "What is the powerhouse of the cell?",
+                    optionA = "Nucleus", optionB = "Mitochondria",
+                    optionC = "Ribosome", optionD = "Golgi body",
+                    correctOption = "B", category = "Science", difficulty = "Hard"),
+                Question(questionText = "What is the chemical formula for table salt?",
+                    optionA = "KCl", optionB = "CaCl",
+                    optionC = "NaCl", optionD = "MgCl",
+                    correctOption = "C", category = "Science", difficulty = "Hard"),
+                Question(questionText = "What is the half life of Carbon-14?",
+                    optionA = "3,730 years", optionB = "5,730 years",
+                    optionC = "7,460 years", optionD = "9,200 years",
+                    correctOption = "B", category = "Science", difficulty = "Hard"),
+                Question(questionText = "Which particle has no electric charge?",
+                    optionA = "Proton", optionB = "Electron",
+                    optionC = "Positron", optionD = "Neutron",
+                    correctOption = "D", category = "Science", difficulty = "Hard"),
+                Question(questionText = "What is Newton's second law of motion?",
+                    optionA = "F = mv", optionB = "F = mg",
+                    optionC = "F = ma", optionD = "F = mc²",
+                    correctOption = "C", category = "Science", difficulty = "Hard"),
+
+                // ==================
+                // MATH - Easy
+                // ==================
+                Question(questionText = "What is 2 + 2?",
+                    optionA = "3", optionB = "5",
+                    optionC = "4", optionD = "6",
+                    correctOption = "C", category = "Math", difficulty = "Easy"),
+                Question(questionText = "What is 10 x 10?",
+                    optionA = "10", optionB = "1000",
+                    optionC = "110", optionD = "100",
+                    correctOption = "D", category = "Math", difficulty = "Easy"),
+                Question(questionText = "What is half of 50?",
+                    optionA = "20", optionB = "30",
+                    optionC = "25", optionD = "15",
+                    correctOption = "C", category = "Math", difficulty = "Easy"),
+                Question(questionText = "How many sides does a triangle have?",
+                    optionA = "4", optionB = "3",
+                    optionC = "5", optionD = "6",
+                    correctOption = "B", category = "Math", difficulty = "Easy"),
+                Question(questionText = "What is 100 divided by 4?",
+                    optionA = "20", optionB = "30",
+                    optionC = "40", optionD = "25",
+                    correctOption = "D", category = "Math", difficulty = "Easy"),
+
+                // ==================
+                // MATH - Medium
+                // ==================
+                Question(questionText = "What is the square root of 64?",
+                    optionA = "6", optionB = "7",
+                    optionC = "9", optionD = "8",
+                    correctOption = "D", category = "Math", difficulty = "Medium"),
+                Question(questionText = "What is 15 x 15?",
+                    optionA = "200", optionB = "225",
+                    optionC = "215", optionD = "205",
+                    correctOption = "B", category = "Math", difficulty = "Medium"),
+                Question(questionText = "What is 12 squared?",
+                    optionA = "124", optionB = "132",
+                    optionC = "144", optionD = "154",
+                    correctOption = "C", category = "Math", difficulty = "Medium"),
+                Question(questionText = "What is 20% of 200?",
+                    optionA = "30", optionB = "50",
+                    optionC = "20", optionD = "40",
+                    correctOption = "D", category = "Math", difficulty = "Medium"),
+                Question(questionText = "What is 3 to the power of 4?",
+                    optionA = "64", optionB = "27",
+                    optionC = "81", optionD = "12",
+                    correctOption = "C", category = "Math", difficulty = "Medium"),
+
+                // ==================
+                // MATH - Hard
+                // ==================
+                Question(questionText = "What is the derivative of x²?",
+                    optionA = "x", optionB = "2",
+                    optionC = "2x", optionD = "x²",
+                    correctOption = "C", category = "Math", difficulty = "Hard"),
+                Question(questionText = "What is the integral of 2x?",
+                    optionA = "2x²", optionB = "x + C",
+                    optionC = "2 + C", optionD = "x² + C",
+                    correctOption = "D", category = "Math", difficulty = "Hard"),
+                Question(questionText = "What is the value of sin(90°)?",
+                    optionA = "0", optionB = "1",
+                    optionC = "-1", optionD = "0.5",
+                    correctOption = "B", category = "Math", difficulty = "Hard"),
+                Question(questionText = "What is the area of a circle with radius 7? (π=3.14)",
+                    optionA = "43.96", optionB = "144.00",
+                    optionC = "153.86", optionD = "21.98",
+                    correctOption = "C", category = "Math", difficulty = "Hard"),
+                Question(questionText = "What is the Fibonacci sequence after 8?",
+                    optionA = "10", optionB = "13",
+                    optionC = "14", optionD = "16",
+                    correctOption = "B", category = "Math", difficulty = "Hard"),
+
+                // ==================
+                // HISTORY - Easy
+                // ==================
+                Question(questionText = "Who wrote Romeo and Juliet?",
+                    optionA = "Shakespeare", optionB = "Dickens",
+                    optionC = "Hemingway", optionD = "Tolkien",
+                    correctOption = "A", category = "History", difficulty = "Easy"),
+                Question(questionText = "Which country gifted the Statue of Liberty to the USA?",
+                    optionA = "England", optionB = "Spain",
+                    optionC = "Italy", optionD = "France",
+                    correctOption = "D", category = "History", difficulty = "Easy"),
+                Question(questionText = "Who was the first man to walk on the moon?",
+                    optionA = "Buzz Aldrin", optionB = "Neil Armstrong",
+                    optionC = "Yuri Gagarin", optionD = "John Glenn",
+                    correctOption = "B", category = "History", difficulty = "Easy"),
+                Question(questionText = "In which year did World War 1 begin?",
+                    optionA = "1916", optionB = "1912",
+                    optionC = "1914", optionD = "1918",
+                    correctOption = "C", category = "History", difficulty = "Easy"),
+                Question(questionText = "What was the first country to give women the right to vote?",
+                    optionA = "USA", optionB = "UK",
+                    optionC = "New Zealand", optionD = "Australia",
+                    correctOption = "C", category = "History", difficulty = "Easy"),
+
+                // ==================
+                // HISTORY - Medium
+                // ==================
+                Question(questionText = "In what year did WW2 end?",
+                    optionA = "1943", optionB = "1944",
+                    optionC = "1946", optionD = "1945",
+                    correctOption = "D", category = "History", difficulty = "Medium"),
+                Question(questionText = "Who was the first Emperor of China?",
+                    optionA = "Kublai Khan", optionB = "Sun Yat-sen",
+                    optionC = "Qin Shi Huang", optionD = "Emperor Wu",
+                    correctOption = "C", category = "History", difficulty = "Medium"),
+                Question(questionText = "Which ancient wonder was located in Alexandria?",
+                    optionA = "Colossus of Rhodes", optionB = "Lighthouse of Alexandria",
+                    optionC = "Hanging Gardens", optionD = "Temple of Artemis",
+                    correctOption = "B", category = "History", difficulty = "Medium"),
+                Question(questionText = "What year did the Berlin Wall fall?",
+                    optionA = "1987", optionB = "1991",
+                    optionC = "1989", optionD = "1993",
+                    correctOption = "C", category = "History", difficulty = "Medium"),
+                Question(questionText = "Who discovered America in 1492?",
+                    optionA = "Vasco da Gama", optionB = "Ferdinand Magellan",
+                    optionC = "Amerigo Vespucci", optionD = "Christopher Columbus",
+                    correctOption = "D", category = "History", difficulty = "Medium"),
+
+                // ==================
+                // HISTORY - Hard
+                // ==================
+                Question(questionText = "Who was the first President of the USA?",
+                    optionA = "Abraham Lincoln", optionB = "George Washington",
+                    optionC = "Thomas Jefferson", optionD = "John Adams",
+                    correctOption = "B", category = "History", difficulty = "Hard"),
+                Question(questionText = "What was the name of the first artificial satellite?",
+                    optionA = "Explorer 1", optionB = "Vostok 1",
+                    optionC = "Apollo 1", optionD = "Sputnik 1",
+                    correctOption = "D", category = "History", difficulty = "Hard"),
+                Question(questionText = "Which treaty ended World War 1?",
+                    optionA = "Treaty of Paris", optionB = "Treaty of Rome",
+                    optionC = "Treaty of Versailles", optionD = "Treaty of Berlin",
+                    correctOption = "C", category = "History", difficulty = "Hard"),
+                Question(questionText = "Who was the longest reigning British monarch?",
+                    optionA = "Queen Victoria", optionB = "King George III",
+                    optionC = "King Henry VIII", optionD = "Queen Elizabeth II",
+                    correctOption = "D", category = "History", difficulty = "Hard"),
+                Question(questionText = "In what year was the Magna Carta signed?",
+                    optionA = "1315", optionB = "1115",
+                    optionC = "1215", optionD = "1415",
+                    correctOption = "C", category = "History", difficulty = "Hard"),
+
+                // ==================
+                // GENERAL - Easy
+                // ==================
+                Question(questionText = "What is the capital city of France?",
+                    optionA = "London", optionB = "Paris",
+                    optionC = "Berlin", optionD = "Rome",
+                    correctOption = "B", category = "General", difficulty = "Easy"),
+                Question(questionText = "How many days are in a leap year?",
+                    optionA = "365", optionB = "367",
+                    optionC = "364", optionD = "366",
+                    correctOption = "D", category = "General", difficulty = "Easy"),
+                Question(questionText = "What is the fastest animal on land?",
+                    optionA = "Lion", optionB = "Leopard",
+                    optionC = "Cheetah", optionD = "Horse",
+                    correctOption = "C", category = "General", difficulty = "Easy"),
+                Question(questionText = "How many continents are there on Earth?",
+                    optionA = "5", optionB = "8",
+                    optionC = "6", optionD = "7",
+                    correctOption = "D", category = "General", difficulty = "Easy"),
+                Question(questionText = "What color is the sky on a clear day?",
+                    optionA = "Green", optionB = "White",
+                    optionC = "Blue", optionD = "Gray",
+                    correctOption = "C", category = "General", difficulty = "Easy"),
+
+                // ==================
+                // GENERAL - Medium
+                // ==================
+                Question(questionText = "Which country won the first World Cup?",
+                    optionA = "Brazil", optionB = "Germany",
+                    optionC = "Uruguay", optionD = "Italy",
+                    correctOption = "C", category = "General", difficulty = "Medium"),
+                Question(questionText = "What is the currency of Japan?",
+                    optionA = "Yuan", optionB = "Won",
+                    optionC = "Yen", optionD = "Baht",
+                    correctOption = "C", category = "General", difficulty = "Medium"),
+                Question(questionText = "Which planet is known as the Red Planet?",
+                    optionA = "Venus", optionB = "Jupiter",
+                    optionC = "Saturn", optionD = "Mars",
+                    correctOption = "D", category = "General", difficulty = "Medium"),
+                Question(questionText = "How many strings does a standard guitar have?",
+                    optionA = "4", optionB = "8",
+                    optionC = "5", optionD = "6",
+                    correctOption = "D", category = "General", difficulty = "Medium"),
+                Question(questionText = "What is the tallest mountain in the world?",
+                    optionA = "K2", optionB = "Mount Everest",
+                    optionC = "Kangchenjunga", optionD = "Lhotse",
+                    correctOption = "B", category = "General", difficulty = "Medium"),
+
+                // ==================
+                // GENERAL - Hard
+                // ==================
+                Question(questionText = "What is the largest ocean on Earth?",
+                    optionA = "Atlantic", optionB = "Indian",
+                    optionC = "Arctic", optionD = "Pacific",
+                    correctOption = "D", category = "General", difficulty = "Hard"),
+                Question(questionText = "What is the smallest country in the world?",
+                    optionA = "Monaco", optionB = "San Marino",
+                    optionC = "Vatican City", optionD = "Liechtenstein",
+                    correctOption = "C", category = "General", difficulty = "Hard"),
+                Question(questionText = "How many bones are in the adult human body?",
+                    optionA = "215", optionB = "206",
+                    optionC = "198", optionD = "220",
+                    correctOption = "B", category = "General", difficulty = "Hard"),
+                Question(questionText = "What is the longest river in the world?",
+                    optionA = "Amazon", optionB = "Mississippi",
+                    optionC = "Yangtze", optionD = "Nile",
+                    correctOption = "D", category = "General", difficulty = "Hard"),
+                Question(questionText = "Which element has the highest melting point?",
+                    optionA = "Iron", optionB = "Tungsten",
+                    optionC = "Platinum", optionD = "Carbon",
+                    correctOption = "B", category = "General", difficulty = "Hard")
+            )
+            questions.forEach { dao.insertQuestion(it) }
+        }
+    }
+}
