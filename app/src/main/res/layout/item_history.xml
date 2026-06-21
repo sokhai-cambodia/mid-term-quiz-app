@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="#FFFFFF"
+    android:background="@color/cardBackgroundColor"
     android:padding="16dp"
     android:layout_marginBottom="8dp"
     android:layout_marginStart="8dp"
@@ -22,7 +22,7 @@
             android:text="Science"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#1B3A6B"/>
+            android:textColor="@color/primaryTextColor"/>
 
         <TextView
             android:id="@+id/tvDifficulty"
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:text="01 Jun 2026"
             android:textSize="12sp"
-            android:textColor="#888888"
+            android:textColor="@color/secondaryTextColor"
             android:layout_marginTop="2dp"/>
 
         <TextView
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:text="Time: 45s"
             android:textSize="12sp"
-            android:textColor="#888888"
+            android:textColor="@color/secondaryTextColor"
             android:layout_marginTop="2dp"/>
 
     </LinearLayout>

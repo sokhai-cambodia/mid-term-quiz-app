@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="@color/backgroundColor">
 
     <LinearLayout
         android:id="@+id/quizHeader"
@@ -39,7 +39,7 @@
             android:layout_weight="1"
             android:text="Question 1 of 5"
             android:textSize="14sp"
-            android:textColor="#888888"/>
+            android:textColor="@color/secondaryTextColor"/>
 
         <TextView
             android:id="@+id/tvTimer"
@@ -74,8 +74,8 @@
         android:layout_height="wrap_content"
         android:text="Question goes here"
         android:textSize="18sp"
-        android:textColor="#222222"
-        android:background="#FFFFFF"
+        android:textColor="@color/primaryTextColor"
+        android:background="@color/cardBackgroundColor"
         android:padding="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
@@ -87,7 +87,7 @@
         android:layout_height="wrap_content"
         android:text="Choose your answer"
         android:textSize="14sp"
-        android:textColor="#888888"
+        android:textColor="@color/secondaryTextColor"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="8dp"/>
 
@@ -96,8 +96,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="A. Option A"
-        android:backgroundTint="#FFFFFF"
-        android:textColor="#333333"
+        android:backgroundTint="@color/cardBackgroundColor"
+        android:textColor="@color/primaryTextColor"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"/>
@@ -107,8 +107,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="B. Option B"
-        android:backgroundTint="#FFFFFF"
-        android:textColor="#333333"
+        android:backgroundTint="@color/cardBackgroundColor"
+        android:textColor="@color/primaryTextColor"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"/>
@@ -118,8 +118,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="C. Option C"
-        android:backgroundTint="#FFFFFF"
-        android:textColor="#333333"
+        android:backgroundTint="@color/cardBackgroundColor"
+        android:textColor="@color/primaryTextColor"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"/>
@@ -129,8 +129,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="D. Option D"
-        android:backgroundTint="#FFFFFF"
-        android:textColor="#333333"
+        android:backgroundTint="@color/cardBackgroundColor"
+        android:textColor="@color/primaryTextColor"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"/>

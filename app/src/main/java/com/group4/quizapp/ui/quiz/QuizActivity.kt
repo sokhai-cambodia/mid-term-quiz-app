@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -151,11 +152,22 @@ class QuizActivity : AppCompatActivity() {
         val correct = questions[currentIndex].correctOption
         val isCorrect = selected == correct
 
+        // Set text color to white for better visibility on result colors
+        val white = ContextCompat.getColor(this, android.R.color.white)
+        
         if (isCorrect) {
-            getButtonByOption(selected).setBackgroundColor(0xFF2ECC71.toInt())
+            val button = getButtonByOption(selected)
+            button.setBackgroundColor(0xFF2ECC71.toInt())
+            button.setTextColor(white)
         } else {
-            getButtonByOption(selected).setBackgroundColor(0xFFE74C3C.toInt())
-            getButtonByOption(correct).setBackgroundColor(0xFF2ECC71.toInt())
+            val selectedButton = getButtonByOption(selected)
+            val correctButton = getButtonByOption(correct)
+            
+            selectedButton.setBackgroundColor(0xFFE74C3C.toInt())
+            selectedButton.setTextColor(white)
+            
+            correctButton.setBackgroundColor(0xFF2ECC71.toInt())
+            correctButton.setTextColor(white)
         }
 
         tvQuestion.postDelayed({ 
@@ -173,11 +185,14 @@ class QuizActivity : AppCompatActivity() {
     }
 
     private fun resetButtonColors() {
-        val white = 0xFFFFFFFF.toInt()
-        btnOptionA.setBackgroundColor(white)
-        btnOptionB.setBackgroundColor(white)
-        btnOptionC.setBackgroundColor(white)
-        btnOptionD.setBackgroundColor(white)
+        val cardBg = ContextCompat.getColor(this, R.color.cardBackgroundColor)
+        val primaryText = ContextCompat.getColor(this, R.color.primaryTextColor)
+        
+        val buttons = listOf(btnOptionA, btnOptionB, btnOptionC, btnOptionD)
+        for (button in buttons) {
+            button.setBackgroundColor(cardBg)
+            button.setTextColor(primaryText)
+        }
     }
 
     override fun onDestroy() {
