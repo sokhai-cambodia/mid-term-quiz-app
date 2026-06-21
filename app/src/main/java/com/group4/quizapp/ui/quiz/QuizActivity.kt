@@ -100,6 +100,10 @@ class QuizActivity : AppCompatActivity() {
         viewModel.quizFinished.observe(this) { finished ->
             if (finished) {
                 val timeSpent = ((System.currentTimeMillis() - startTime) / 1000).toInt()
+                
+                // Save results with details before finishing
+                viewModel.saveResults(category, difficulty, timeSpent)
+                
                 val intent = Intent(this, ResultActivity::class.java)
                 intent.putExtra("score", viewModel.score.value ?: 0)
                 intent.putExtra("total", viewModel.questions.value?.size ?: 0)
@@ -141,8 +145,7 @@ class QuizActivity : AppCompatActivity() {
             override fun onFinish() {
                 tvTimer.text = "0s"
                 if (!isAnswered) {
-                    isAnswered = true
-                    viewModel.answerQuestion(false)
+                    checkAnswer("None")
                 }
             }
         }.start()
@@ -163,23 +166,30 @@ class QuizActivity : AppCompatActivity() {
         // Set text color to white for better visibility on result colors
         val white = ContextCompat.getColor(this, android.R.color.white)
         
-        if (isCorrect) {
-            val button = getButtonByOption(selected)
-            button.setBackgroundColor(0xFF2ECC71.toInt())
-            button.setTextColor(white)
+        if (selected != "None") {
+            if (isCorrect) {
+                val button = getButtonByOption(selected)
+                button.setBackgroundColor(0xFF2ECC71.toInt())
+                button.setTextColor(white)
+            } else {
+                val selectedButton = getButtonByOption(selected)
+                val correctButton = getButtonByOption(correct)
+                
+                selectedButton.setBackgroundColor(0xFFE74C3C.toInt())
+                selectedButton.setTextColor(white)
+                
+                correctButton.setBackgroundColor(0xFF2ECC71.toInt())
+                correctButton.setTextColor(white)
+            }
         } else {
-            val selectedButton = getButtonByOption(selected)
+            // Show correct answer even if time ran out
             val correctButton = getButtonByOption(correct)
-            
-            selectedButton.setBackgroundColor(0xFFE74C3C.toInt())
-            selectedButton.setTextColor(white)
-            
             correctButton.setBackgroundColor(0xFF2ECC71.toInt())
             correctButton.setTextColor(white)
         }
 
         tvQuestion.postDelayed({ 
-            viewModel.answerQuestion(isCorrect)
+            viewModel.answerQuestion(selected)
         }, 1000)
     }
 

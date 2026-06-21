@@ -11,11 +11,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import com.group4.quizapp.R
-import com.group4.quizapp.data.database.QuizResult
 import com.group4.quizapp.ui.main.MainActivity
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class ResultActivity : AppCompatActivity() {
 
@@ -66,20 +62,8 @@ class ResultActivity : AppCompatActivity() {
             else -> "Keep practicing! 💪"
         }
 
-        // Save result to database
-        val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-        val today = dateFormat.format(Date())
-
-        viewModel.saveResult(
-            QuizResult(
-                category = category,
-                difficulty = difficulty,
-                score = score,
-                totalQuestions = total,
-                dateTaken = today,
-                timeSpent = timeSpent
-            )
-        )
+        // Result saving is now handled in QuizActivity/QuizViewModel for detail capture
+        // So we don't save it here anymore to avoid duplicates.
 
         // Button clicks
         btnRetake.setOnClickListener {

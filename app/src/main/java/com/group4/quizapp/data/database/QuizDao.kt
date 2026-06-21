@@ -28,7 +28,13 @@ interface QuizDao {
 
     // Results
     @Insert
-    suspend fun insertResult(result: QuizResult)
+    suspend fun insertResult(result: QuizResult): Long
+
+    @Insert
+    suspend fun insertAttemptDetails(details: List<QuizAttemptDetail>)
+
+    @Query("SELECT * FROM quiz_attempt_details WHERE resultId = :resultId")
+    suspend fun getAttemptDetails(resultId: Int): List<QuizAttemptDetail>
 
     @Query("SELECT * FROM quiz_results ORDER BY id DESC")
     suspend fun getAllResults(): List<QuizResult>

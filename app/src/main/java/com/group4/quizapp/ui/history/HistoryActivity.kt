@@ -14,6 +14,7 @@ import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.group4.quizapp.R
+import com.group4.quizapp.ui.details.QuizDetailActivity
 import com.group4.quizapp.ui.main.MainActivity
 
 class HistoryActivity : AppCompatActivity() {
@@ -86,9 +87,13 @@ class HistoryActivity : AppCompatActivity() {
                     "No history found!",
                     Toast.LENGTH_SHORT
                 ).show()
-                recyclerView.adapter = HistoryAdapter(emptyList())
+                recyclerView.adapter = HistoryAdapter(emptyList()) {}
             } else {
-                recyclerView.adapter = HistoryAdapter(results)
+                recyclerView.adapter = HistoryAdapter(results) { result ->
+                    val intent = Intent(this, QuizDetailActivity::class.java)
+                    intent.putExtra("resultId", result.id)
+                    startActivity(intent)
+                }
             }
         }
     }

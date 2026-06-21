@@ -8,8 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.group4.quizapp.R
 import com.group4.quizapp.data.database.QuizResult
 
-class HistoryAdapter(private val results: List<QuizResult>) :
-    RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
+class HistoryAdapter(
+    private val results: List<QuizResult>,
+    private val onItemClick: (QuizResult) -> Unit
+) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
     class HistoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvCategory: TextView = view.findViewById(R.id.tvCategory)
@@ -48,6 +50,10 @@ class HistoryAdapter(private val results: List<QuizResult>) :
                 else -> 0xFFE74C3C.toInt()
             }
         )
+
+        holder.itemView.setOnClickListener {
+            onItemClick(result)
+        }
     }
 
     override fun getItemCount() = results.size

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/cardBackgroundColor"
+    android:padding="16dp"
+    android:layout_marginBottom="12dp">
+
+    <TextView
+        android:id="@+id/tvQuestionText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Question text here?"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/primaryTextColor"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:id="@+id/tvOptionA"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="A. Option A"
+        android:textSize="14sp"
+        android:padding="4dp"/>
+
+    <TextView
+        android:id="@+id/tvOptionB"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="B. Option B"
+        android:textSize="14sp"
+        android:padding="4dp"/>
+
+    <TextView
+        android:id="@+id/tvOptionC"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="C. Option C"
+        android:textSize="14sp"
+        android:padding="4dp"/>
+
+    <TextView
+        android:id="@+id/tvOptionD"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="D. Option D"
+        android:textSize="14sp"
+        android:padding="4dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#DDDDDD"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/tvResultStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status: Correct"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="#2ECC71"/>
+
+</LinearLayout>
