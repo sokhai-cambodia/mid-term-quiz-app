@@ -35,6 +35,7 @@ class QuizActivity : AppCompatActivity() {
     private var category = "General"
     private var difficulty = "Easy"
     private var lastShownIndex = -1
+    private var isAnswered = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -66,10 +67,10 @@ class QuizActivity : AppCompatActivity() {
         setupObservers()
         viewModel.loadQuestions(category, difficulty)
 
-        btnOptionA.setOnClickListener { checkAnswer("A") }
-        btnOptionB.setOnClickListener { checkAnswer("B") }
-        btnOptionC.setOnClickListener { checkAnswer("C") }
-        btnOptionD.setOnClickListener { checkAnswer("D") }
+        btnOptionA.setOnClickListener { if (!isAnswered) checkAnswer("A") }
+        btnOptionB.setOnClickListener { if (!isAnswered) checkAnswer("B") }
+        btnOptionC.setOnClickListener { if (!isAnswered) checkAnswer("C") }
+        btnOptionD.setOnClickListener { if (!isAnswered) checkAnswer("D") }
     }
 
     private fun setupObservers() {
@@ -114,6 +115,7 @@ class QuizActivity : AppCompatActivity() {
     private fun showQuestion(question: Question, index: Int, total: Int) {
         if (index == lastShownIndex) return
         lastShownIndex = index
+        isAnswered = false
 
         timer?.cancel()
         tvQuestionNumber.text = "Question ${index + 1} of $total"
@@ -138,12 +140,18 @@ class QuizActivity : AppCompatActivity() {
             }
             override fun onFinish() {
                 tvTimer.text = "0s"
-                viewModel.answerQuestion(false)
+                if (!isAnswered) {
+                    isAnswered = true
+                    viewModel.answerQuestion(false)
+                }
             }
         }.start()
     }
 
     private fun checkAnswer(selected: String) {
+        if (isAnswered) return
+        isAnswered = true
+
         val questions = viewModel.questions.value ?: return
         val currentIndex = viewModel.currentIndex.value ?: 0
         if (currentIndex >= questions.size) return

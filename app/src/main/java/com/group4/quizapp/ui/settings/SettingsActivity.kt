@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -58,8 +59,6 @@ class SettingsActivity : AppCompatActivity() {
             } else {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             }
-            // Recreate activity to apply theme change immediately if needed, 
-            // though setDefaultNightMode usually handles it.
         }
 
         // Timer buttons
@@ -102,32 +101,25 @@ class SettingsActivity : AppCompatActivity() {
     private fun updateTimerSelectionUI() {
         val selectedDuration = viewModel.timerDuration
         
-        val activeColor = 0xFF1B3A6B.toInt() // Dark Blue
+        val activeColor = 0xFF1B3A6B.toInt() // Dark Blue (Matches Home Page)
         val activeTextColor = 0xFFFFFFFF.toInt() // White
         
-        val inactive15Color = 0xFF1B3A6B.toInt()
-        val inactive30Color = 0xFFF5A623.toInt()
-        val inactive60Color = 0xFF30B0C7.toInt()
-        val inactive90Color = 0xFFAAC4EE.toInt()
-        val inactiveTextColor = 0xFF000000.toInt()
+        val inactiveColor = ContextCompat.getColor(this, R.color.cardBackgroundColor)
+        val inactiveTextColor = ContextCompat.getColor(this, R.color.primaryTextColor)
 
-        // Reset colors to default (using what was in XML or similar)
-        // Since buttons have backgroundTint in XML, we'll override here
-        
-        btn15s.setBackgroundColor(if (selectedDuration == 15) activeColor else inactive15Color)
-        btn15s.setTextColor(if (selectedDuration == 15) activeTextColor else 0xFFFFFFFF.toInt()) // 15s was blue in XML
-        if (selectedDuration != 15) btn15s.alpha = 0.5f else btn15s.alpha = 1.0f
+        val buttons = listOf(btn15s, btn30s, btn60s, btn90s)
+        val durations = listOf(15, 30, 60, 90)
 
-        btn30s.setBackgroundColor(if (selectedDuration == 30) activeColor else inactive30Color)
-        btn30s.setTextColor(if (selectedDuration == 30) activeTextColor else inactiveTextColor)
-        if (selectedDuration != 30) btn30s.alpha = 0.5f else btn30s.alpha = 1.0f
-
-        btn60s.setBackgroundColor(if (selectedDuration == 60) activeColor else inactive60Color)
-        btn60s.setTextColor(if (selectedDuration == 60) activeTextColor else inactiveTextColor)
-        if (selectedDuration != 60) btn60s.alpha = 0.5f else btn60s.alpha = 1.0f
-
-        btn90s.setBackgroundColor(if (selectedDuration == 90) activeColor else inactive90Color)
-        btn90s.setTextColor(if (selectedDuration == 90) activeTextColor else inactiveTextColor)
-        if (selectedDuration != 90) btn90s.alpha = 0.5f else btn90s.alpha = 1.0f
+        for (i in buttons.indices) {
+            if (durations[i] == selectedDuration) {
+                buttons[i].setBackgroundColor(activeColor)
+                buttons[i].setTextColor(activeTextColor)
+                buttons[i].alpha = 1.0f
+            } else {
+                buttons[i].setBackgroundColor(inactiveColor)
+                buttons[i].setTextColor(inactiveTextColor)
+                buttons[i].alpha = 0.8f // Subtle transparency for unselected
+            }
+        }
     }
 }
