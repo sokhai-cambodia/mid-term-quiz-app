@@ -6,5 +6,5 @@ import javax.inject.Inject
 class SeedDatabaseUseCase @Inject constructor(
     private val repository: QuizRepository
 ) {
-    suspend operator fun invoke() = repository.seedQuestions()
+    suspend operator fun invoke() = repository.seedDatabase()
 }

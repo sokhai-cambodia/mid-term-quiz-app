@@ -15,7 +15,7 @@ A native Android trivia quiz app built with Kotlin. Pick a category and difficul
 ## Tech stack
 
 - **Language:** Kotlin
-- **UI:** Android Views + XML layouts (`findViewById`, no Jetpack Compose)
+- **UI:** Android Views + XML layouts, with ViewBinding in Activities (RecyclerView adapters still use `findViewById`); no Jetpack Compose
 - **Architecture:** Clean Architecture (domain / data / presentation) + MVVM
 - **Async:** Kotlin Coroutines + `Flow` / `StateFlow`
 - **DI:** Hilt
@@ -52,13 +52,15 @@ com.group4.quizapp/
 │   ├── repository/             # QuizRepositoryImpl
 │   └── seed/                   # DatabaseSeeder (question bank)
 ├── ui/                         # One package per screen: Activity + ViewModel (+ Adapter)
+│   ├── base/                   # BaseActivity<VB> — shared onCreate template (insets, dark mode, ViewBinding)
 │   ├── splash/  main/  quiz/  result/
 │   └── history/  leaderboard/  details/  settings/
 └── utils/
     └── PreferencesManager.kt   # SharedPreferences wrapper (dark mode, timer duration)
 ```
 
-- **ViewModels** are `@HiltViewModel`, constructor-injected with use cases, and expose state as `StateFlow`. They contain no Android `Application`/`Context` dependency.
+- **ViewModels** are `@HiltViewModel`, constructor-injected with use cases, and expose state as `StateFlow`. They contain no Android `Application`/`Context` dependency. `QuizViewModel` consolidates its quiz-session state into a single `QuizUiState` data class (one `StateFlow`) rather than separate flows per field; the other ViewModels expose simpler per-screen flows directly.
+- **All Activities extend `BaseActivity<VB : ViewBinding>`** (`ui/base/BaseActivity.kt`), which handles ViewBinding inflate, `enableEdgeToEdge()`, and window-inset padding in one place. Activities only implement `initViews()` (required) and optionally `setupObservers()`. Dark mode is applied exactly once, globally, in `QuizApplication.onCreate()` (and re-applied directly by `SettingsActivity` when toggled) — not per-Activity.
 - **Use cases** wrap repository-touching operations (`GetQuestionsUseCase`, `SaveQuizResultUseCase`, `ObserveHistoryUseCase`, etc.). Trivial pure computations (score math, button colors) stay in the ViewModel/View layer.
 - **History and Leaderboard are reactive end-to-end:** the DAO returns `Flow<List<...>>` for those queries, so the UI updates automatically whenever the underlying table changes (e.g. clearing history or finishing a quiz) — no manual reload calls.
 - **`getQuestions`** (one quiz session) and **`getAttemptDetails`** (one result's breakdown) stay as one-shot `suspend fun` calls, since they don't need to react to later changes.

@@ -5,7 +5,7 @@
 | Layer | Technology |
 |---|---|
 | Language | **Kotlin** (2.2.10), 100% Kotlin codebase |
-| UI Toolkit | **XML layouts** + `findViewById` (no Jetpack Compose) |
+| UI Toolkit | **XML layouts** + **ViewBinding** in Activities, `findViewById` in RecyclerView adapters (no Jetpack Compose) |
 | Min/Target SDK | minSdk 30, targetSdk 36, compileSdk 36 |
 | Dependency Injection | **Hilt** 2.59.2 (Dagger-based) |
 | Database | **Room** 2.8.4 (SQLite ORM) with **KSP** annotation processing |
@@ -35,6 +35,7 @@ This is more advanced than a typical university MVVM exercise — it adds a genu
 | Component | Purpose |
 |---|---|
 | `QuizApplication` | Hilt entry point (`@HiltAndroidApp`); applies saved dark-mode preference at app startup before any Activity is created |
+| `ui/base/BaseActivity` | Abstract base class all 8 Activities extend; centralizes ViewBinding inflate, edge-to-edge setup, and window-inset padding via a template method (`initViews()` / `setupObservers()`). Dark mode is applied once globally by `QuizApplication` at startup, not per-Activity |
 | **ui/splash** | `SplashActivity` — 2-second branded delay screen, then navigates to Main |
 | **ui/main** | `MainActivity`/`MainViewModel` — category (Science/Math/History/General) & difficulty (Easy/Medium/Hard) picker; triggers DB seeding; navigation hub |
 | **ui/quiz** | `QuizActivity`/`QuizViewModel` — runs the 5-question quiz session, per-question countdown timer, scoring |
@@ -57,19 +58,24 @@ SplashActivity (2s delay)
        - MainViewModel.seedDatabase() wipes & reseeds questions on every visit
        - user picks category + difficulty (button UI state)
        - "Start Quiz" → Intent extras (category, difficulty) → QuizActivity
-   → QuizActivity (@AndroidEntryPoint)
-       - QuizViewModel.loadQuestions(category, difficulty)
+   → QuizActivity (@AndroidEntryPoint, extends BaseActivity<ActivityQuizBinding>)
+       - initViews(): reads category/difficulty from Intent extras, calls
+         viewModel.loadQuestions(category, difficulty)
            → GetQuestionsUseCase → QuizRepository.getQuestions()
            → DAO query picks 5 RANDOM distinct questions matching category+difficulty
-       - UI collects 3 StateFlows via repeatOnLifecycle(STARTED):
-           questions, currentIndex, quizFinished
+       - setupObservers(): collects ONE StateFlow<QuizUiState> via
+         repeatOnLifecycle(STARTED), where QuizUiState bundles questions,
+         currentIndex, score, isFinished, isLoading, errorMessage
+       - Each question rendered via binding.xxx (ViewBinding) using string
+         resources (getString(R.string.question_progress, ...), option_a..d_format)
+         instead of manual string concatenation
        - Each question: CountDownTimer (duration from PreferencesManager,
          default 30s) — auto-submits "None" on timeout
        - Tapping an option → checkAnswer() colors buttons (green=correct,
          red=wrong), 1s delay, then viewModel.answerQuestion(selected)
-           - updates score (StateFlow), advances currentIndex,
-             or sets quizFinished=true after 5th question
-       - On quizFinished:
+           - updates score, advances currentIndex, or sets isFinished=true
+             after 5th question — all via one state.copy() on QuizUiState
+       - On isFinished:
            - QuizViewModel.saveResults() → SaveQuizResultUseCase
                → inserts QuizResultEntity (score/category/date/timeSpent)
                → inserts QuizAttemptDetailEntity per question (full answer record)
@@ -113,11 +119,12 @@ Separately, from MainActivity:
 | `data/local/QuizDao.kt` | All SQL queries, including the `ORDER BY RANDOM() LIMIT 5` question-picking logic |
 | `data/local/QuizDatabase.kt` | Room database definition, entity registry, version |
 | `data/mapper/QuizMappers.kt` | Entity ↔ Domain model conversion |
-| `ui/quiz/QuizViewModel.kt` | Core quiz session state machine (StateFlow-driven) |
-| `ui/quiz/QuizActivity.kt` | Most complex Activity — timer, answer UI, Flow collection via `repeatOnLifecycle` |
+| `ui/base/BaseActivity.kt` | Shared `onCreate` template (ViewBinding inflate, edge-to-edge, window insets) all 8 Activities build on |
+| `ui/quiz/QuizViewModel.kt` | Core quiz session state machine — single consolidated `QuizUiState` (questions/currentIndex/score/isFinished/isLoading/errorMessage) exposed as one `StateFlow` |
+| `ui/quiz/QuizActivity.kt` | Most complex Activity — timer, answer UI via ViewBinding, single `QuizUiState` flow collected via `repeatOnLifecycle` |
 | `domain/usecase/*.kt` | Single-responsibility business operations, the "use case" layer of Clean Architecture |
 | `app/QuizApp_MVVM_Refactor_Spec.md` | Original refactor spec used to migrate from Activity-centric code to this MVVM/Clean Architecture design |
 
 ---
 
-**Presentation note:** the project shows a clear evolutionary story — `QuizApp_MVVM_Refactor_Spec.md` documents the original plan (basic MVVM with `AndroidViewModel` + `LiveData`), but the actual implementation went further: Hilt DI, `Flow`/`StateFlow` instead of `LiveData`, and a full domain/use-case layer — a step toward Clean Architecture beyond the original spec.
+**Presentation note:** the project shows a clear evolutionary story — `QuizApp_MVVM_Refactor_Spec.md` documents the original plan (basic MVVM with `AndroidViewModel` + `LiveData`), but the actual implementation went further: Hilt DI, `Flow`/`StateFlow` instead of `LiveData`, and a full domain/use-case layer — a step toward Clean Architecture beyond the original spec. The team then refined the View layer further: introducing ViewBinding and a shared `BaseActivity` to eliminate boilerplate (window insets, edge-to-edge setup) repeated across all 8 screens, and consolidating `QuizViewModel`'s four separate `StateFlow`s into one `QuizUiState` for simpler, safer state management. A later cleanup pass removed a redundant per-Activity dark-mode re-application (dark mode is now applied exactly once, globally, in `QuizApplication.onCreate()`), deleted two unused custom color resources (`black`/`white`, never referenced — the code uses the system `android.R.color.white` directly), and replaced two non-compiling placeholder test files with real coverage already in place (`QuizDaoTest`, `QuizViewModelTest`).

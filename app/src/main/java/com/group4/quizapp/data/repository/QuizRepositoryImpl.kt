@@ -39,7 +39,7 @@ class QuizRepositoryImpl @Inject constructor(
 
     override suspend fun clearResults() = dao.clearResults()
 
-    override suspend fun seedQuestions() {
+    override suspend fun seedDatabase() {
         dao.clearAllQuestions()
         DatabaseSeeder.seedQuestions().forEach { dao.insertQuestion(it.toEntity()) }
     }

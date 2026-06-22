@@ -12,54 +12,59 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class QuizUiState(
+    val questions: List<Question> = emptyList(),
+    val currentIndex: Int = 0,
+    val score: Int = 0,
+    val isFinished: Boolean = false,
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null
+)
+
 @HiltViewModel
 class QuizViewModel @Inject constructor(
     private val getQuestionsUseCase: GetQuestionsUseCase,
     private val saveQuizResultUseCase: SaveQuizResultUseCase
 ) : ViewModel() {
 
-    // null = not loaded yet, distinct from "loaded and genuinely empty"
-    private val _questions = MutableStateFlow<List<Question>?>(null)
-    val questions: StateFlow<List<Question>?> = _questions.asStateFlow()
-
-    private val _currentIndex = MutableStateFlow(0)
-    val currentIndex: StateFlow<Int> = _currentIndex.asStateFlow()
-
-    private val _score = MutableStateFlow(0)
-    val score: StateFlow<Int> = _score.asStateFlow()
-
-    private val _quizFinished = MutableStateFlow(false)
-    val quizFinished: StateFlow<Boolean> = _quizFinished.asStateFlow()
+    private val _uiState = MutableStateFlow(QuizUiState())
+    val uiState: StateFlow<QuizUiState> = _uiState.asStateFlow()
 
     private val userAnswers = mutableListOf<String>()
 
     fun loadQuestions(category: String, difficulty: String) {
         viewModelScope.launch {
-            _questions.value = getQuestionsUseCase(category, difficulty)
+            val result = getQuestionsUseCase(category, difficulty)
+            _uiState.value = _uiState.value.copy(
+                questions = result,
+                isLoading = false,
+                errorMessage = if (result.isEmpty()) "No questions found!" else null
+            )
         }
     }
 
     fun answerQuestion(selectedOption: String) {
-        val currentQuestions = _questions.value ?: return
-        val index = _currentIndex.value
-
-        if (index < currentQuestions.size) {
+        val currentState = _uiState.value
+        val index = currentState.currentIndex
+        
+        if (index < currentState.questions.size) {
             userAnswers.add(selectedOption)
-            val isCorrect = selectedOption == currentQuestions[index].correctOption
-            if (isCorrect) _score.value = _score.value + 1
-
+            val isCorrect = selectedOption == currentState.questions[index].correctOption
+            val newScore = if (isCorrect) currentState.score + 1 else currentState.score
+            
             val next = index + 1
-            if (next >= currentQuestions.size) {
-                _quizFinished.value = true
+            if (next >= currentState.questions.size) {
+                _uiState.value = currentState.copy(score = newScore, isFinished = true)
             } else {
-                _currentIndex.value = next
+                _uiState.value = currentState.copy(score = newScore, currentIndex = next)
             }
         }
     }
 
     fun saveResults(category: String, difficulty: String, timeSpent: Int) {
-        val questionsList = _questions.value ?: return
-        val scoreValue = _score.value
+        val currentState = _uiState.value
+        val questionsList = currentState.questions
+        val scoreValue = currentState.score
 
         viewModelScope.launch {
             saveQuizResultUseCase(

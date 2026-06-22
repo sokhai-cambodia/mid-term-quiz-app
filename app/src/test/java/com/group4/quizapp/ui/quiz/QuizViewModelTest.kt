@@ -62,7 +62,7 @@ class QuizViewModelTest {
 
         viewModel.answerQuestion("A")
 
-        assertEquals(1, viewModel.score.value)
+        assertEquals(1, viewModel.uiState.value.score)
     }
 
     @Test
@@ -72,7 +72,7 @@ class QuizViewModelTest {
 
         viewModel.answerQuestion("B")
 
-        assertEquals(0, viewModel.score.value)
+        assertEquals(0, viewModel.uiState.value.score)
     }
 
     @Test
@@ -82,7 +82,7 @@ class QuizViewModelTest {
 
         viewModel.answerQuestion("A")
 
-        assertEquals(1, viewModel.currentIndex.value)
+        assertEquals(1, viewModel.uiState.value.currentIndex)
     }
 
     @Test
@@ -93,7 +93,7 @@ class QuizViewModelTest {
         viewModel.answerQuestion("A")
         viewModel.answerQuestion("B")
 
-        assertTrue(viewModel.quizFinished.value)
+        assertTrue(viewModel.uiState.value.isFinished)
     }
 }
 
@@ -106,5 +106,5 @@ private class FakeQuizRepository(private val questions: List<Question>) : QuizRe
     override fun searchResults(query: String): Flow<List<QuizResult>> = flowOf(emptyList())
     override fun getTopScoresByCategory(): Flow<List<QuizResult>> = flowOf(emptyList())
     override suspend fun clearResults() {}
-    override suspend fun seedQuestions() {}
+    override suspend fun seedDatabase() {}
 }

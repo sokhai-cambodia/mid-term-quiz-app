@@ -4,6 +4,4 @@
     <color name="cardBackgroundColor">#FFFFFF</color>
     <color name="primaryTextColor">#1B3A6B</color>
     <color name="secondaryTextColor">#888888</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
 </resources>
