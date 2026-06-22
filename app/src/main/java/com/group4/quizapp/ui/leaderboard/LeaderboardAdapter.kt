@@ -8,8 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.group4.quizapp.R
 import com.group4.quizapp.domain.model.QuizResult
 
-class LeaderboardAdapter(private val results: List<QuizResult>) :
-    RecyclerView.Adapter<LeaderboardAdapter.LeaderboardViewHolder>() {
+class LeaderboardAdapter(
+    private val results: List<QuizResult>,
+    private val onItemClick: (QuizResult) -> Unit
+) : RecyclerView.Adapter<LeaderboardAdapter.LeaderboardViewHolder>() {
 
     class LeaderboardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvRank: TextView = view.findViewById(R.id.tvRank)
@@ -32,6 +34,10 @@ class LeaderboardAdapter(private val results: List<QuizResult>) :
         holder.tvDifficulty.text = result.difficulty
         holder.tvDate.text = result.dateTaken
         holder.tvScore.text = result.score.toString()
+
+        holder.itemView.setOnClickListener {
+            onItemClick(result)
+        }
     }
 
     override fun getItemCount() = results.size

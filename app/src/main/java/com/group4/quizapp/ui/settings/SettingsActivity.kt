@@ -16,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class SettingsActivity : BaseActivity<ActivitySettingsBinding>(ActivitySettingsBinding::inflate) {
 
     private val viewModel: SettingsViewModel by viewModels()
+    private var currentToast: Toast? = null
 
     override fun getHeaderView(): View = binding.settingsHeader
 
@@ -39,28 +40,28 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding>(ActivitySettingsB
             btn15s.setOnClickListener {
                 prefs.timerDuration = 15
                 updateTimerSelectionUI()
-                Toast.makeText(this@SettingsActivity, "Timer set to 15 seconds", Toast.LENGTH_SHORT).show()
+                showToast("Timer set to 15 seconds")
             }
             btn30s.setOnClickListener {
                 prefs.timerDuration = 30
                 updateTimerSelectionUI()
-                Toast.makeText(this@SettingsActivity, "Timer set to 30 seconds", Toast.LENGTH_SHORT).show()
+                showToast("Timer set to 30 seconds")
             }
             btn60s.setOnClickListener {
                 prefs.timerDuration = 60
                 updateTimerSelectionUI()
-                Toast.makeText(this@SettingsActivity, "Timer set to 60 seconds", Toast.LENGTH_SHORT).show()
+                showToast("Timer set to 60 seconds")
             }
             btn90s.setOnClickListener {
                 prefs.timerDuration = 90
                 updateTimerSelectionUI()
-                Toast.makeText(this@SettingsActivity, "Timer set to 90 seconds", Toast.LENGTH_SHORT).show()
+                showToast("Timer set to 90 seconds")
             }
 
             // Clear all history
             btnClearAllHistory.setOnClickListener {
                 viewModel.clearHistory()
-                Toast.makeText(this@SettingsActivity, "All history cleared!", Toast.LENGTH_SHORT).show()
+                showToast("All history cleared!")
             }
 
             // Go Home button
@@ -70,6 +71,12 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding>(ActivitySettingsB
                 startActivity(intent)
             }
         }
+    }
+
+    private fun showToast(message: String) {
+        currentToast?.cancel()
+        currentToast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
+        currentToast?.show()
     }
 
     private fun updateTimerSelectionUI() {
@@ -97,5 +104,10 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding>(ActivitySettingsB
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        currentToast?.cancel()
+        super.onDestroy()
     }
 }

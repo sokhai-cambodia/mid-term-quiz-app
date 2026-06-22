@@ -9,6 +9,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.group4.quizapp.databinding.ActivityLeaderboardBinding
 import com.group4.quizapp.ui.base.BaseActivity
+import com.group4.quizapp.ui.details.QuizDetailActivity
 import com.group4.quizapp.ui.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -34,7 +35,11 @@ class LeaderboardActivity : BaseActivity<ActivityLeaderboardBinding>(ActivityLea
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.topScores.collect { scores ->
-                    binding.recyclerLeaderboard.adapter = LeaderboardAdapter(scores)
+                    binding.recyclerLeaderboard.adapter = LeaderboardAdapter(scores) { result ->
+                        val intent = Intent(this@LeaderboardActivity, QuizDetailActivity::class.java)
+                        intent.putExtra("resultId", result.id)
+                        startActivity(intent)
+                    }
                 }
             }
         }
