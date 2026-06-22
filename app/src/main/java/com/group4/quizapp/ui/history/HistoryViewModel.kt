@@ -2,33 +2,38 @@ package com.group4.quizapp.ui.history
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.group4.quizapp.data.database.QuizDatabase
-import com.group4.quizapp.data.database.QuizResult
-import com.group4.quizapp.data.repository.QuizRepository
-import kotlinx.coroutines.Dispatchers
+import com.group4.quizapp.data.QuizRepository
+import com.group4.quizapp.data.model.QuizResult
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = QuizRepository(
-        QuizDatabase.getDatabase(application).quizDao()
-    )
+    private val repository = QuizRepository.getInstance(application)
+    private val query = MutableStateFlow("")
 
-    private val _results = MutableLiveData<List<QuizResult>>()
-    val results: LiveData<List<QuizResult>> = _results
+    val results: StateFlow<List<QuizResult>?> = query
+        .flatMapLatest { q ->
+            if (q.isBlank()) repository.getAllResults() else repository.searchResults(q)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    fun loadHistory() = viewModelScope.launch(Dispatchers.IO) {
-        _results.postValue(repository.getAllResults())
+    fun search(newQuery: String) {
+        query.value = newQuery
     }
 
-    fun search(query: String) = viewModelScope.launch(Dispatchers.IO) {
-        _results.postValue(repository.searchResults(query))
+    fun loadHistory() {
+        // FlatMap handles this automatically, but we can reset query
+        query.value = ""
     }
 
-    fun clearHistory() = viewModelScope.launch(Dispatchers.IO) {
+    fun clearHistory() = viewModelScope.launch {
         repository.clearResults()
-        _results.postValue(emptyList())
     }
 }

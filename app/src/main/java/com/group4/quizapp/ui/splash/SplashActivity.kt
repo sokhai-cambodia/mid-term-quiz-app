@@ -1,35 +1,26 @@
 package com.group4.quizapp.ui.splash
 
 import android.content.Intent
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import com.group4.quizapp.R
+import com.group4.quizapp.databinding.ActivitySplashBinding
+import com.group4.quizapp.ui.base.BaseActivity
 import com.group4.quizapp.ui.main.MainActivity
-import com.group4.quizapp.utils.PreferencesManager
 
-class SplashActivity : AppCompatActivity() {
+class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding::inflate) {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash)
+    private val handler = Handler(Looper.getMainLooper())
+    private val navigateTask = Runnable {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
+    }
 
-        // Apply saved dark mode preference
-        val prefs = PreferencesManager(this)
-        if (prefs.isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
+    override fun initViews() {
+        handler.postDelayed(navigateTask, 2000)
+    }
 
-        // Wait 2 seconds then go to Home Screen
-        Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }, 2000)
+    override fun onDestroy() {
+        handler.removeCallbacks(navigateTask)
+        super.onDestroy()
     }
 }

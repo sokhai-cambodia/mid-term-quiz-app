@@ -1,8 +1,11 @@
-package com.group4.quizapp.data.database
+package com.group4.quizapp.data.local
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.group4.quizapp.data.model.Question
+import com.group4.quizapp.data.model.QuizResult
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -50,7 +53,7 @@ class QuizDaoTest {
             totalQuestions = 5, dateTaken = "21 Jun 2026", timeSpent = 30
         )
         dao.insertResult(result)
-        val results = dao.getAllResults()
+        val results = dao.getAllResults().first()
         assertEquals(1, results.size)
         assertEquals(5, results[0].score)
     }
@@ -59,7 +62,7 @@ class QuizDaoTest {
     fun clearResults() = runBlocking {
         dao.insertResult(QuizResult(category = "T1", score = 5, totalQuestions = 5, dateTaken = "D1"))
         dao.clearResults()
-        val results = dao.getAllResults()
+        val results = dao.getAllResults().first()
         assertEquals(0, results.size)
     }
 
@@ -67,8 +70,8 @@ class QuizDaoTest {
     fun searchResults() = runBlocking {
         dao.insertResult(QuizResult(category = "Science", score = 5, totalQuestions = 5, dateTaken = "D1"))
         dao.insertResult(QuizResult(category = "Math", score = 3, totalQuestions = 5, dateTaken = "D2"))
-        
-        val searchSci = dao.searchResults("Sci")
+
+        val searchSci = dao.searchResults("Sci").first()
         assertEquals(1, searchSci.size)
         assertEquals("Science", searchSci[0].category)
     }

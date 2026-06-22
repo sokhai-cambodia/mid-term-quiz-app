@@ -2,69 +2,71 @@ package com.group4.quizapp.ui.quiz
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.group4.quizapp.data.database.Question
-import com.group4.quizapp.data.database.QuizAttemptDetail
-import com.group4.quizapp.data.database.QuizDatabase
-import com.group4.quizapp.data.database.QuizResult
-import com.group4.quizapp.data.repository.QuizRepository
-import kotlinx.coroutines.Dispatchers
+import com.group4.quizapp.data.QuizRepository
+import com.group4.quizapp.data.model.Question
+import com.group4.quizapp.data.model.QuizAttemptDetail
+import com.group4.quizapp.data.model.QuizResult
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+data class QuizUiState(
+    val questions: List<Question> = emptyList(),
+    val currentIndex: Int = 0,
+    val score: Int = 0,
+    val isFinished: Boolean = false,
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null
+)
+
 class QuizViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = QuizRepository(
-        QuizDatabase.getDatabase(application).quizDao()
-    )
+    private val repository = QuizRepository.getInstance(application)
 
-    private val _questions = MutableLiveData<List<Question>>()
-    val questions: LiveData<List<Question>> = _questions
-
-    private val _currentIndex = MutableLiveData(0)
-    val currentIndex: LiveData<Int> = _currentIndex
-
-    private val _score = MutableLiveData(0)
-    val score: LiveData<Int> = _score
-
-    private val _quizFinished = MutableLiveData(false)
-    val quizFinished: LiveData<Boolean> = _quizFinished
+    private val _uiState = MutableStateFlow(QuizUiState())
+    val uiState: StateFlow<QuizUiState> = _uiState.asStateFlow()
 
     private val userAnswers = mutableListOf<String>()
 
     fun loadQuestions(category: String, difficulty: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             val result = repository.getQuestions(category, difficulty)
-            _questions.postValue(result)
+            _uiState.value = _uiState.value.copy(
+                questions = result,
+                isLoading = false,
+                errorMessage = if (result.isEmpty()) "No questions found!" else null
+            )
         }
     }
 
     fun answerQuestion(selectedOption: String) {
-        val currentQuestions = _questions.value ?: return
-        val index = _currentIndex.value ?: 0
+        val currentState = _uiState.value
+        val index = currentState.currentIndex
         
-        if (index < currentQuestions.size) {
+        if (index < currentState.questions.size) {
             userAnswers.add(selectedOption)
-            val isCorrect = selectedOption == currentQuestions[index].correctOption
-            if (isCorrect) _score.value = (_score.value ?: 0) + 1
+            val isCorrect = selectedOption == currentState.questions[index].correctOption
+            val newScore = if (isCorrect) currentState.score + 1 else currentState.score
             
             val next = index + 1
-            if (next >= currentQuestions.size) {
-                _quizFinished.value = true
+            if (next >= currentState.questions.size) {
+                _uiState.value = currentState.copy(score = newScore, isFinished = true)
             } else {
-                _currentIndex.value = next
+                _uiState.value = currentState.copy(score = newScore, currentIndex = next)
             }
         }
     }
 
     fun saveResults(category: String, difficulty: String, timeSpent: Int) {
-        val questionsList = _questions.value ?: return
-        val scoreValue = _score.value ?: 0
-        
-        viewModelScope.launch(Dispatchers.IO) {
+        val currentState = _uiState.value
+        val questionsList = currentState.questions
+        val scoreValue = currentState.score
+
+        viewModelScope.launch {
             val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
             val today = dateFormat.format(Date())
             

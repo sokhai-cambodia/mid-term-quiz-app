@@ -1,98 +1,69 @@
 package com.group4.quizapp.ui.history
 
 import android.content.Intent
-import android.os.Bundle
-import android.widget.Button
+import android.view.View
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.group4.quizapp.R
+import com.group4.quizapp.databinding.ActivityHistoryBinding
+import com.group4.quizapp.ui.base.BaseActivity
 import com.group4.quizapp.ui.details.QuizDetailActivity
 import com.group4.quizapp.ui.main.MainActivity
+import kotlinx.coroutines.launch
 
-class HistoryActivity : AppCompatActivity() {
+class HistoryActivity : BaseActivity<ActivityHistoryBinding>(ActivityHistoryBinding::inflate) {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var btnClearHistory: Button
-    private lateinit var searchView: SearchView
     private val viewModel: HistoryViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_history)
+    override fun getHeaderView(): View = binding.historyHeader
 
-        // Handle window insets for safe header and footer
-        val rootLayout = findViewById<android.view.ViewGroup>(R.id.historyRoot)
-        val header = findViewById<android.view.ViewGroup>(R.id.historyHeader)
-        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            header.updatePadding(top = systemBars.top)
-            v.updatePadding(bottom = systemBars.bottom)
-            insets
-        }
+    override fun initViews() {
+        binding.recyclerHistory.layoutManager = LinearLayoutManager(this)
 
-        recyclerView = findViewById(R.id.recyclerHistory)
-        btnClearHistory = findViewById(R.id.btnClearHistory)
-        searchView = findViewById(R.id.searchHistory)
-
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
-        setupObservers()
-        viewModel.loadHistory()
-        setupSearch()
-
-        btnClearHistory.setOnClickListener {
+        binding.btnClearHistory.setOnClickListener {
             viewModel.clearHistory()
         }
 
-        // Go Home button
-        val btnGoHomeHistory = findViewById<Button>(R.id.btnGoHomeHistory)
-        btnGoHomeHistory.setOnClickListener {
+        binding.btnGoHomeHistory.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             startActivity(intent)
         }
+
+        setupSearch()
     }
 
     private fun setupSearch() {
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
-            }
+        binding.searchHistory.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean = false
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                if (newText.isNullOrBlank()) {
-                    viewModel.loadHistory()
-                } else {
-                    viewModel.search(newText)
-                }
+                viewModel.search(newText.orEmpty())
                 return true
             }
         })
     }
 
-    private fun setupObservers() {
-        viewModel.results.observe(this) { results ->
-            if (results.isEmpty() && searchView.query.isNullOrBlank()) {
-                Toast.makeText(
-                    this@HistoryActivity,
-                    "No history found!",
-                    Toast.LENGTH_SHORT
-                ).show()
-                recyclerView.adapter = HistoryAdapter(emptyList()) {}
-            } else {
-                recyclerView.adapter = HistoryAdapter(results) { result ->
-                    val intent = Intent(this, QuizDetailActivity::class.java)
-                    intent.putExtra("resultId", result.id)
-                    startActivity(intent)
+    override fun setupObservers() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.results.collect { results ->
+                    if (results == null) return@collect
+
+                    if (results.isEmpty() && binding.searchHistory.query.isNullOrBlank()) {
+                        Toast.makeText(this@HistoryActivity, "No history found!", Toast.LENGTH_SHORT).show()
+                        binding.recyclerHistory.adapter = HistoryAdapter(emptyList()) {}
+                    } else {
+                        binding.recyclerHistory.adapter = HistoryAdapter(results) { result ->
+                            val intent = Intent(this@HistoryActivity, QuizDetailActivity::class.java)
+                            intent.putExtra("resultId", result.id)
+                            startActivity(intent)
+                        }
+                    }
                 }
             }
         }

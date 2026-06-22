@@ -1,8 +1,12 @@
-package com.group4.quizapp.data.database
+package com.group4.quizapp.data.local
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.group4.quizapp.data.model.Question
+import com.group4.quizapp.data.model.QuizAttemptDetail
+import com.group4.quizapp.data.model.QuizResult
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface QuizDao {
@@ -20,11 +24,11 @@ interface QuizDao {
 """)
     suspend fun getQuestions(category: String, difficulty: String): List<Question>
 
-    @Query("SELECT * FROM questions")
-    suspend fun getAllQuestions(): List<Question>
-
     @Insert
     suspend fun insertQuestion(question: Question)
+
+    @Query("DELETE FROM questions")
+    suspend fun clearAllQuestions()
 
     // Results
     @Insert
@@ -37,19 +41,14 @@ interface QuizDao {
     suspend fun getAttemptDetails(resultId: Int): List<QuizAttemptDetail>
 
     @Query("SELECT * FROM quiz_results ORDER BY id DESC")
-    suspend fun getAllResults(): List<QuizResult>
+    fun getAllResults(): Flow<List<QuizResult>>
 
     @Query("DELETE FROM quiz_results")
     suspend fun clearResults()
 
-    // For Leaderboard — top score per category
     @Query("SELECT * FROM quiz_results ORDER BY score DESC")
-    suspend fun getTopScoresByCategory(): List<QuizResult>
+    fun getTopScoresByCategory(): Flow<List<QuizResult>>
 
-    // For Search/Filter on History
     @Query("SELECT * FROM quiz_results WHERE category LIKE '%' || :query || '%' OR difficulty LIKE '%' || :query || '%' ORDER BY id DESC")
-    suspend fun searchResults(query: String): List<QuizResult>
-
-    @Query("DELETE FROM questions")
-    suspend fun clearAllQuestions()
+    fun searchResults(query: String): Flow<List<QuizResult>>
 }

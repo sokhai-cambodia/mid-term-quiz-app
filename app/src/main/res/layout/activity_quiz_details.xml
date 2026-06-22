@@ -36,7 +36,7 @@
         android:id="@+id/btnBack"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Back to History"
+        android:text="@string/back"
         android:backgroundTint="#1B3A6B"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
