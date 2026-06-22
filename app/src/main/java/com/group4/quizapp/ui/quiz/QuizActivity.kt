@@ -10,14 +10,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.group4.quizapp.R
-import com.group4.quizapp.domain.model.Question
+import com.group4.quizapp.data.model.Question
 import com.group4.quizapp.databinding.ActivityQuizBinding
 import com.group4.quizapp.ui.base.BaseActivity
 import com.group4.quizapp.ui.result.ResultActivity
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-@AndroidEntryPoint
 class QuizActivity : BaseActivity<ActivityQuizBinding>(ActivityQuizBinding::inflate) {
 
     private val viewModel: QuizViewModel by viewModels()

@@ -11,10 +11,8 @@ import com.group4.quizapp.databinding.ActivityLeaderboardBinding
 import com.group4.quizapp.ui.base.BaseActivity
 import com.group4.quizapp.ui.details.QuizDetailActivity
 import com.group4.quizapp.ui.main.MainActivity
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-@AndroidEntryPoint
 class LeaderboardActivity : BaseActivity<ActivityLeaderboardBinding>(ActivityLeaderboardBinding::inflate) {
 
     private val viewModel: LeaderboardViewModel by viewModels()

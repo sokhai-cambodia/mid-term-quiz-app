@@ -1,18 +1,15 @@
 package com.group4.quizapp.ui.settings
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.group4.quizapp.domain.usecase.ClearHistoryUseCase
+import com.group4.quizapp.data.QuizRepository
 import com.group4.quizapp.utils.PreferencesManager
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class SettingsViewModel @Inject constructor(
-    private val preferencesManager: PreferencesManager,
-    private val clearHistoryUseCase: ClearHistoryUseCase
-) : ViewModel() {
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository = QuizRepository.getInstance(application)
+    private val preferencesManager = PreferencesManager(application)
 
     val isDarkMode get() = preferencesManager.isDarkMode
     val timerDuration get() = preferencesManager.timerDuration
@@ -21,6 +18,6 @@ class SettingsViewModel @Inject constructor(
     fun setTimerDuration(seconds: Int) { preferencesManager.timerDuration = seconds }
 
     fun clearHistory() = viewModelScope.launch {
-        clearHistoryUseCase()
+        repository.clearResults()
     }
 }

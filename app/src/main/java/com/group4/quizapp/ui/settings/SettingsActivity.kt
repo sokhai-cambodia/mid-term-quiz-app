@@ -10,9 +10,7 @@ import com.group4.quizapp.R
 import com.group4.quizapp.databinding.ActivitySettingsBinding
 import com.group4.quizapp.ui.base.BaseActivity
 import com.group4.quizapp.ui.main.MainActivity
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
 class SettingsActivity : BaseActivity<ActivitySettingsBinding>(ActivitySettingsBinding::inflate) {
 
     private val viewModel: SettingsViewModel by viewModels()

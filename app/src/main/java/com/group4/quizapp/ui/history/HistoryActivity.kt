@@ -13,10 +13,8 @@ import com.group4.quizapp.databinding.ActivityHistoryBinding
 import com.group4.quizapp.ui.base.BaseActivity
 import com.group4.quizapp.ui.details.QuizDetailActivity
 import com.group4.quizapp.ui.main.MainActivity
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-@AndroidEntryPoint
 class HistoryActivity : BaseActivity<ActivityHistoryBinding>(ActivityHistoryBinding::inflate) {
 
     private val viewModel: HistoryViewModel by viewModels()

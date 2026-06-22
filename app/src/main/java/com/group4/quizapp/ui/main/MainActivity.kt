@@ -9,9 +9,7 @@ import com.group4.quizapp.ui.history.HistoryActivity
 import com.group4.quizapp.ui.leaderboard.LeaderboardActivity
 import com.group4.quizapp.ui.quiz.QuizActivity
 import com.group4.quizapp.ui.settings.SettingsActivity
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate) {
 
     private val viewModel: MainViewModel by viewModels()

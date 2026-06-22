@@ -1,16 +1,19 @@
 package com.group4.quizapp.ui.quiz
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.group4.quizapp.domain.model.Question
-import com.group4.quizapp.domain.usecase.GetQuestionsUseCase
-import com.group4.quizapp.domain.usecase.SaveQuizResultUseCase
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.group4.quizapp.data.QuizRepository
+import com.group4.quizapp.data.model.Question
+import com.group4.quizapp.data.model.QuizAttemptDetail
+import com.group4.quizapp.data.model.QuizResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 data class QuizUiState(
     val questions: List<Question> = emptyList(),
@@ -21,11 +24,8 @@ data class QuizUiState(
     val errorMessage: String? = null
 )
 
-@HiltViewModel
-class QuizViewModel @Inject constructor(
-    private val getQuestionsUseCase: GetQuestionsUseCase,
-    private val saveQuizResultUseCase: SaveQuizResultUseCase
-) : ViewModel() {
+class QuizViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository = QuizRepository.getInstance(application)
 
     private val _uiState = MutableStateFlow(QuizUiState())
     val uiState: StateFlow<QuizUiState> = _uiState.asStateFlow()
@@ -34,7 +34,7 @@ class QuizViewModel @Inject constructor(
 
     fun loadQuestions(category: String, difficulty: String) {
         viewModelScope.launch {
-            val result = getQuestionsUseCase(category, difficulty)
+            val result = repository.getQuestions(category, difficulty)
             _uiState.value = _uiState.value.copy(
                 questions = result,
                 isLoading = false,
@@ -67,14 +67,34 @@ class QuizViewModel @Inject constructor(
         val scoreValue = currentState.score
 
         viewModelScope.launch {
-            saveQuizResultUseCase(
+            val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+            val today = dateFormat.format(Date())
+            
+            val result = QuizResult(
                 category = category,
                 difficulty = difficulty,
                 score = scoreValue,
-                questions = questionsList,
-                userAnswers = userAnswers,
+                totalQuestions = questionsList.size,
+                dateTaken = today,
                 timeSpent = timeSpent
             )
+            
+            val resultId = repository.insertResult(result).toInt()
+            
+            val details = questionsList.mapIndexed { index, question ->
+                QuizAttemptDetail(
+                    resultId = resultId,
+                    questionText = question.questionText,
+                    selectedOption = if (index < userAnswers.size) userAnswers[index] else "None",
+                    correctOption = question.correctOption,
+                    optionA = question.optionA,
+                    optionB = question.optionB,
+                    optionC = question.optionC,
+                    optionD = question.optionD
+                )
+            }
+            
+            repository.insertAttemptDetails(details)
         }
     }
 }

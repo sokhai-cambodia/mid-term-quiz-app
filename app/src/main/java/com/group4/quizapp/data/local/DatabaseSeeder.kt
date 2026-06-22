@@ -1,9 +1,9 @@
-package com.group4.quizapp.data.seed
+package com.group4.quizapp.data.local
 
-import com.group4.quizapp.domain.model.Question
+import com.group4.quizapp.data.model.Question
 
 object DatabaseSeeder {
-    fun seedQuestions(): List<Question> = listOf(
+    fun getQuestions(): List<Question> = listOf(
 
         // ==================
         // SCIENCE - Easy

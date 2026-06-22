@@ -8,10 +8,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.group4.quizapp.databinding.ActivityQuizDetailsBinding
 import com.group4.quizapp.ui.base.BaseActivity
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-@AndroidEntryPoint
 class QuizDetailActivity : BaseActivity<ActivityQuizDetailsBinding>(ActivityQuizDetailsBinding::inflate) {
 
     private val viewModel: QuizDetailViewModel by viewModels()

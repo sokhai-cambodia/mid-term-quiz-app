@@ -10,7 +10,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.viewbinding.ViewBinding
 import com.group4.quizapp.utils.PreferencesManager
-import javax.inject.Inject
 
 abstract class BaseActivity<VB : ViewBinding>(
     private val inflate: (LayoutInflater) -> VB
@@ -19,8 +18,7 @@ abstract class BaseActivity<VB : ViewBinding>(
     private var _binding: VB? = null
     protected val binding get() = _binding!!
 
-    @Inject
-    lateinit var prefs: PreferencesManager
+    protected val prefs: PreferencesManager by lazy { PreferencesManager(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()

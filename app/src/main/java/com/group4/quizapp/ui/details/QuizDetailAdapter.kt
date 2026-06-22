@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.group4.quizapp.R
-import com.group4.quizapp.domain.model.QuizAttemptDetail
+import com.group4.quizapp.data.model.QuizAttemptDetail
 
 class QuizDetailAdapter(private val details: List<QuizAttemptDetail>) :
     RecyclerView.Adapter<QuizDetailAdapter.DetailViewHolder>() {

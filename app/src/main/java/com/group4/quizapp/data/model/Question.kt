@@ -1,10 +1,10 @@
-package com.group4.quizapp.data.local.entity
+package com.group4.quizapp.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "questions")
-data class QuestionEntity(
+data class Question(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val questionText: String,

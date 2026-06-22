@@ -6,9 +6,7 @@ import com.group4.quizapp.R
 import com.group4.quizapp.databinding.ActivityResultBinding
 import com.group4.quizapp.ui.base.BaseActivity
 import com.group4.quizapp.ui.main.MainActivity
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
 class ResultActivity : BaseActivity<ActivityResultBinding>(ActivityResultBinding::inflate) {
 
     override fun getHeaderView(): View = binding.resultHeader
