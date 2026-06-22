@@ -124,3 +124,51 @@ Separately, from MainActivity:
 **Presentation note:** the project shows a clear evolutionary story. It started Activity-centric with no ViewModel/LiveData (see git history). It was then refactored into a layered **Clean MVVM** — Hilt DI, a `domain/` package with a repository interface and 8 single-responsibility use cases, and an entity↔domain-model mapper layer — a step toward full Clean Architecture, beyond what a typical mid-term project needs. That layering made the dependency graph and the data flow harder to narrate to a non-technical reviewer (e.g. "why does the ViewModel call a use case that calls a repository interface that's bound to an impl via a Hilt module that converts a Room entity into a domain model and back?").
 
 The project was then **deliberately simplified back down to flat Simple MVVM**: Hilt, the `domain/` package, the mapper layer, and all use cases were removed; ViewModels now build a `QuizRepository` singleton directly and call it without indirection; the Room `@Entity` classes in `data/model/` serve as the UI's model classes too. The result is the same `Activity → ViewModel → Repository → Room` flow described above, with one file per responsibility and nothing to explain beyond "Model is `data/`, View/ViewModel is `ui/`, `QuizRepository` is the bridge."
+
+## 7. Code Lifecycle, A to Z
+
+### A. Process start — `QuizApplication`
+
+Android creates one `Application` instance before any screen exists. `QuizApplication.onCreate()` runs first and applies the saved dark-mode preference via `PreferencesManager` + `AppCompatDelegate.setDefaultNightMode(...)`, so every screen launches already themed correctly (`QuizApplication.kt:9-19`).
+
+### B. Activity lifecycle (Android's standard callbacks)
+
+Every Activity (all 8 extend `BaseActivity`) goes through these in order:
+
+| Stage | Meaning | In this app |
+|---|---|---|
+| `onCreate()` | Screen built: inflate layout, set up views, ViewModel | `BaseActivity` calls the template methods `initViews()` + `setupObservers()` here |
+| `onStart()` | Becomes visible | rarely overridden |
+| `onResume()` | Interactive, in foreground | running, accepting taps |
+| `onPause()` | Losing focus (e.g. navigating away) | |
+| `onStop()` | No longer visible | |
+| `onDestroy()` | Torn down | `QuizActivity.onDestroy()` cancels the `CountDownTimer` (`QuizActivity.kt:183-186`) so it doesn't leak |
+
+### C. Screen-to-screen flow (the app's own A→Z journey)
+
+```
+QuizApplication (process boot)
+  → SplashActivity        (2s delay)
+  → MainActivity          (pick category/difficulty)
+  → QuizActivity          (answer questions, timer running)
+  → ResultActivity        (shows score)
+  → back to MainActivity, or → HistoryActivity / LeaderboardActivity
+```
+See Section 4 for the full step-by-step.
+
+### D. Inside one screen: MVVM data lifecycle
+
+Using `QuizActivity` as the concrete example:
+
+1. **`initViews()`** reads the Intent extras (`category`, `difficulty`) and calls `viewModel.loadQuestions(...)` (`QuizActivity.kt:31-43`).
+2. **`QuizViewModel`** survives configuration changes (rotation), launches a coroutine in `viewModelScope`, asks `QuizRepository` for questions, and exposes a `StateFlow<QuizUiState>`.
+3. **`QuizRepository`** is the single source of truth — talks to Room (`QuizDao`) and `DatabaseSeeder`.
+4. **Room** (`QuizDatabase` → `QuizDao`) runs the actual SQL (`suspend` functions / `Flow`), backed by SQLite on disk.
+5. **Back up the chain**: the `StateFlow` emits a new `QuizUiState` → `QuizActivity.setupObservers()` collects it inside `repeatOnLifecycle(Lifecycle.State.STARTED)` (`QuizActivity.kt:45-80`). This means collection automatically pauses when the Activity is stopped and resumes when started again — UI is never updated on a dead screen.
+6. **User answers** → `checkAnswer()` → `viewModel.answerQuestion()` → ViewModel updates state → flow emits again → UI redraws. When `state.isFinished` is true, the ViewModel saves the result via the repository and the Activity navigates to `ResultActivity`.
+
+### E. End of life
+
+When the last Activity finishes and the process has no more work, Android eventually reclaims the `Application` process — but unlike Activities, there's no guaranteed `onDestroy()` call for `Application`; the OS just kills the process when it needs memory back.
+
+**One-sentence summary:** user input flows `Activity → ViewModel → Repository → Room`, and state flows back the same path via Kotlin `StateFlow`, observed safely inside the Android Activity lifecycle using `repeatOnLifecycle`.
